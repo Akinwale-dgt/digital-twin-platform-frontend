@@ -2,6 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 import  SubjectiveEvaluationComponent  from '../components/SubjectiveEvaluation/SubjectiveEvaluation'
+import { Typography } from '@mui/material';
 
 export default function SubjectiveEvaluation() {
   return (
@@ -13,9 +14,9 @@ export default function SubjectiveEvaluation() {
       </Head>
 
       <main>
-        <h1 >
+        <Typography variant='h4' sx={{textAlign: 'center'}} >
          Please fill in the form correctly
-        </h1>
+        </Typography>
         <SubjectiveEvaluationComponent/>
       </main>
 
@@ -25,8 +26,6 @@ export default function SubjectiveEvaluation() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
         }
         footer {
           width: 100%;
@@ -46,21 +45,7 @@ export default function SubjectiveEvaluation() {
           text-decoration: none;
           color: inherit;
         }
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family:
-            Menlo,
-            Monaco,
-            Lucida Console,
-            Liberation Mono,
-            DejaVu Sans Mono,
-            Bitstream Vera Sans Mono,
-            Courier New,
-            monospace;
-        }
+        
       `}</style>
 
       <style jsx global>{`

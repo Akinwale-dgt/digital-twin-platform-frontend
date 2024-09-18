@@ -8,7 +8,7 @@ const CustomNextIcon = () => 'Next';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#F05423',
+      main: '#0070f3',
     },
     secondary: {
       main: '#4B4B4B',

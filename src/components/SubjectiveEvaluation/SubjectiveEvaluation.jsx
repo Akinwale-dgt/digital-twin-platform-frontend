@@ -2,83 +2,39 @@
 import React, { useState } from 'react';
 import { Stepper, Step, StepLabel, CircularProgress, Button } from '@mui/material';
 import { Formik, Form, FormikHelpers } from 'formik';
-// import FirstStep from './ListingStepForms/FirstStep/FirstStep';
-// import SecondStep from './ListingStepForms/SecondStep/SecondStep';
+import axios from 'axios';
 import styles from './SubjectiveEvaluation.module.css';
 import validationSchema from './FormModel/ValidationSchema';
-// import Success from '../../components/Success/Success';
-// import ListingFormModel from './FormModel/ListingFormModel';
-// import ThirdStep from './ListingStepForms/ThirdStep/ThirdStep';
-// import CustomButton from '../../components/CustomButton/CustomButton';
+import FirstStepForm from './StepForms/FirstStep/FirstStep';
 
 function getSteps() {
-  const steps = ['Discomfort', 'Cognitive Workload', 'Balance', 'Exertion', 'Situational Awareness'];
+  const steps = ['Perceived Level of Discomfort', 'Cognitive Workload', 'Balance', 'Exertion', 'Situational Awareness'];
   return steps;
 }
 
-// const { formId, formField } = ListingFormModel;
-
 function renderStepContent(
   step,
-  setFieldValue,
-  values,
-
 ) {
   switch (step) {
     case 0:
       return (
-        <>Hello</>
-        // <FirstStep
-        //   isEdit={isEdit}
-        //   formField={formField}
-        //   providerList={providerList}
-        //   setFieldValue={setFieldValue}
-        //   secondaryMobileNumbersArray={secondaryMobileNumbers}
-        // />
+        <FirstStepForm/>
       );
     case 1:
       return (
-          <>World</>
-        // <SecondStep setFieldValue={setFieldValue} values={values} formField={formField} />
+         <FirstStepForm/>
       );
     case 2:
       return (
-          <>Yummy</>
-        // <ThirdStep
-        //   isEdit={isEdit}
-        //   supportingDocs={supportingDocuments}
-        //   setSupportDocs={setSupportDocs}
-        //   values={values}
-        //   providerList={providerList}
-        //   privateDocs={privateDocs}
-        //   setPrivateDocs={setPrivateDocs}
-        // />
+           <FirstStepForm/>
       );
       case 3:
       return (
-          <>Yummy</>
-        // <ThirdStep
-        //   isEdit={isEdit}
-        //   supportingDocs={supportingDocuments}
-        //   setSupportDocs={setSupportDocs}
-        //   values={values}
-        //   providerList={providerList}
-        //   privateDocs={privateDocs}
-        //   setPrivateDocs={setPrivateDocs}
-        // />
+          <FirstStepForm/>
       );
       case 4:
       return (
-          <>Yummy</>
-        // <ThirdStep
-        //   isEdit={isEdit}
-        //   supportingDocs={supportingDocuments}
-        //   setSupportDocs={setSupportDocs}
-        //   values={values}
-        //   providerList={providerList}
-        //   privateDocs={privateDocs}
-        //   setPrivateDocs={setPrivateDocs}
-        // />
+           <FirstStepForm/>
       );
     default:
       return <div>Not Found</div>;
@@ -102,6 +58,23 @@ export default function SubjectiveEvaluationComponent() {
     setActiveStep(activeStep - 1);
   };
 
+  const sendDiscomfortData =(values)=> {
+    axios.post('https://digital-twin-platform.onrender.com/api/discomfort', {
+    hand_and_waist: Number(values.handWrist),
+    upper_arm: Number(values.upperArm) ,
+    shoulder: Number(values.shoulder),
+    lower_back: Number(values.lowerBack),
+    thigh: Number(values.thigh),
+    lower_leg_and_foot: Number(values.lowerLegAndFoot),
+    neck: Number(values.neck)
+  })
+  .then((response) => {
+    console.log(response);
+  }, (error) => {
+      console.log(error);
+    });
+  }
+
 
   const handleSubmit = (
     values,
@@ -109,33 +82,48 @@ export default function SubjectiveEvaluationComponent() {
   ) => {
     if (isLastStep) {
       submitForm(values , actions);
-    }else {
+    }else if(activeStep === 0) {
+       actions.setSubmitting(true);
+       sendDiscomfortData(values)
+      console.log(values)
        setActiveStep(activeStep +1);
+        actions.setSubmitting(false);
     }
   };
 
-  const initialValues = 'defaultValues';
-
   return (
     <React.Fragment>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <React.Fragment>
+      <Stepper activeStep={activeStep} alternativeLabel>
+  {steps.map((label) => (
+    <Step key={label}>
+      <StepLabel sx={{
+        marginTop: '16px',
+    fontSize: '18px',
+    fontWeight: '700',
+      }}>{label}</StepLabel>
+    </Step>
+  ))}
+</Stepper>
+
         {activeStep === steps.length ? (
-         ' <Success />'
+         'Go back'
         ) : (
           <Formik
-            initialValues={initialValues}
+             initialValues={{
+              handWrist: 0,
+              lowerBack: 0,
+              lowerLegAndFoot: 0,
+              neck: 0,
+              upperArm: 0,
+              thigh: 0,
+              shoulder: 0,
+              discomfortLevel: ''
+      }}
             validationSchema={currentValidationSchema}
             onSubmit={handleSubmit}
           >
             {({ isSubmitting, setFieldValue, values }) => (
-              <Form id={'formId'}>
+              <Form id={'subjectiveEvaluation'}>
                 {renderStepContent(
                   activeStep,
                   setFieldValue,
@@ -144,20 +132,19 @@ export default function SubjectiveEvaluationComponent() {
 
                 <div className={styles.stepperButtonSection}>
                   {activeStep !== 0 && (
-                    <Button type="button">
+                    <Button type="button" onClick={handleBack}>
                       Back
                     </Button>
                   )}
-                  <Button type="submit" isPrimary>
+                  <Button type="submit">
                     {isLastStep ? 'Request Approval' : 'Next'}
-                    {/* {isSubmitting && <CircularProgress color="secondary" size={18} />} */}
+                    {isSubmitting && <CircularProgress color="secondary" size={18} />}
                   </Button>
                 </div>
               </Form>
             )}
           </Formik>
         )}
-      </React.Fragment>
     </React.Fragment>
   );
 }
