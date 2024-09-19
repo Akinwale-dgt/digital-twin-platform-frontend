@@ -5,7 +5,8 @@ import App from 'next/app';
 import { Fragment } from 'react';
 import Head from 'next/head';
 import { ToastContainer } from 'react-toastify';
-import theme from '../../src/theme'
+import theme from '../../src/theme';
+ import 'react-toastify/dist/ReactToastify.css';
 
 import React from 'react';
 

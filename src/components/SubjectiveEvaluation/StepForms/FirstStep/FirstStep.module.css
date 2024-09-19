@@ -8,12 +8,22 @@
   margin-top: 20px;
   padding: 20px;
   font-size: 20px;
+  /* max-width: 900px; */
 }
 
 .fieldsetStyle textarea {
   border-radius: 20px;
   resize: none;
   padding: 20px;
+}
+
+.ratingImage {
+  margin-top: 50px;
+}
+
+.spanStyle {
+ font-size: 12px;
+ font-weight: 500;
 }
 
 .formField label {

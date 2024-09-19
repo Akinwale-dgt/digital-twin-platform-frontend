@@ -2,6 +2,8 @@ import React from 'react';
 import { Box, Typography, Grid } from '@mui/material';
 import styles from './FirstStep.module.css';
 import { Field, ErrorMessage } from 'formik';
+import RatingImage from '../../../../images/Picture2.png'
+import Image from 'next/image'
 
 export default function FirstStepForm(props) {
   return (
@@ -10,8 +12,15 @@ export default function FirstStepForm(props) {
         <Typography variant='p' sx={{textAlign: 'center'}}>For the condition you just completed, please use the scale and diagram in front of you to rate the level of discomfort you experienced in the following body parts during the task. 
           For body parts with two sides (e.g., left and right legs), please rate the worst side of the two.
         </Typography>
-        <Box>
-
+        <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
+           <Box className={styles.ratingImage}>
+              <Image
+                src={RatingImage}
+                width={400}
+                height={400}
+                alt="rating scale"
+              />
+            </Box>
         <fieldset className={styles.fieldsetStyle}>
             <legend>Choose your rating</legend>
             <Box>
@@ -380,26 +389,6 @@ export default function FirstStepForm(props) {
           </Box>
             </Box>
         </fieldset>
-
-        <fieldset  className={styles.fieldsetStyle}>
-          <legend>Did you rate any body part more than "3" above? </legend>
-           <Field
-            id="discomfortLevel"
-            name="discomfortLevel"
-            component="textarea"
-            cols={120}
-            rows={10}
-            placeholder='Please explain what you think is the source of that discomfort'
-          />
-          <Box>
-            <ErrorMessage
-              component="span"
-              name={'discomfortLevel'}
-              className={styles.errorSection}
-            />
-          </Box>
-        </fieldset>
-
         </Box>
       </Box>
     </React.Fragment>
