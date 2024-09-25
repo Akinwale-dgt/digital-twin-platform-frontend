@@ -30,3 +30,7 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.css-rsks93-MuiPaper-root-MuiDialog-paper{
+  padding: 30px;
+}

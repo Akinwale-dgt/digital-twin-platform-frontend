@@ -7,6 +7,7 @@ import Head from 'next/head';
 import { ToastContainer } from 'react-toastify';
 import theme from '../../src/theme';
  import 'react-toastify/dist/ReactToastify.css';
+ import Header from "../../src/components/Header/Header"
 
 import React from 'react';
 
@@ -16,6 +17,7 @@ function MyApp({ Component, pageProps: { ...pageProps } }) {
   return (
     <>
       <ToastContainer autoClose={2000} />
+         <Header/>
           <StyledEngineProvider injectFirst>
             <CssBaseline />
             <Head>

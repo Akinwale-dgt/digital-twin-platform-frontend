@@ -1,0 +1,65 @@
+/* ScoreChart.css */
+.scorecard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 500px;
+  margin: 0 auto;
+}
+
+.scoreBar {
+  display: flex;
+  align-items: center;
+}
+
+.scoreLabel {
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.barWrapper {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  display: flex;
+}
+
+.bar {
+  height: 100%;
+}
+
+.low {
+  background-color: #f44336; /* Red for low */
+  width: 33.33%;
+}
+
+.medium {
+  background-color: #ff9800; /* Yellow for medium */
+  width: 33.33%;
+}
+
+.high {
+  background-color: #4caf50; /* Green for high */
+  width: 33.33%;
+}
+
+.marker {
+  position: absolute;
+  top: -25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.arrow {
+  font-size: 16px;
+  color: #000;
+}
+
+.scoreValue {
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: -5px;
+}

@@ -10,6 +10,7 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
+    "@mui/x-charts": "^7.18.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
     "chartjs": "^0.3.24",
@@ -18,7 +19,10 @@
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "18.2.0",
+    "react-gauge-chart": "^0.5.1",
     "react-toastify": "^10.0.5",
+    "recharts": "^2.12.7",
+    "victory": "^37.1.1",
     "yup": "^1.4.0"
   },
   "engines": {
