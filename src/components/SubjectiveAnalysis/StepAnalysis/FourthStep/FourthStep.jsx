@@ -1,16 +1,16 @@
+import GuageCard from "../../../Guage/Guage";
 import React from "react";
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import styles from '../FirstStep/FirstStep.module.css'
-import CognitiveWorkloadChart from '../../../ScoreCard/ScoreCard'
 
 // Register necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 
-const SecondStepAnalysis = (props) => {
+const FourthStepAnalysis = (props) => {
   const{data} = props;
-
+  const exertionData = data?.data?.exertion
 
   const newData =data?.data?.cognitiveWorkload
 
@@ -50,27 +50,22 @@ const SecondStepAnalysis = (props) => {
   return (
     <>
     <div className={styles.main}>
-        <h6>Perceived Cognitive Workload Analysis</h6>
+        <h6>Perceived Exertion Rate Analysis</h6>
       <div className={styles.container}>
         {/* Column 1 - Bar Chart */}
         {/* <div className={styles.colmd}>
-          <h3>Cognitive Workload Representation</h3>
+          <h3>Perceived Exertion Rate Architecture</h3>
           <Bar data={barChartData} options={barChartOptions} height={500} />
         </div> */}
-
-        {/* Column 3 - Summary */}
+        {/* Column 2 - Summary */}
         <div className={styles.colmd}>
-             <h3>Cognitive Workload Overview</h3>
-          <CognitiveWorkloadChart data={newData}/>
+             <h3>Perceived Exertion Rate Architecture</h3>
+          <GuageCard data={exertionData} valueMax={20} />
         </div>
       </div>
-        {/* <div>
-          <h3>Summary</h3>
-          <p>Total Average: {newData?.totalAverage.toFixed(2)}</p>
-        </div> */}
     </div>
     </>
   );
 };
 
-export default SecondStepAnalysis;
+export default FourthStepAnalysis;

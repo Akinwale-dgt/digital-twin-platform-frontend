@@ -1,20 +1,24 @@
 import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
+import ObjectiveEvaluationComponent from '../components/ObjectiveEvaluation/ObjectiveEvaluation';
 
 export default function SubjectiveEvaluation() {
   return (
     <>
     <div className={styles.container}>
       <Head>
-        <title>Subjective Evaluation</title>
+        <title>Objective Evaluation</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <main style={{ padding: 1}}>
+        {/* <Typography variant='h4' sx={{textAlign: 'center', marginTop: 0}} >
+          Subjective Analysis
+        </Typography> */}
         <h1 className={styles.title}>
-          Welcome to <a href="#">Twin Digital Platform!</a>
         </h1>
+         <ObjectiveEvaluationComponent/>
       </main>
 
       <style jsx>{`
@@ -23,42 +27,7 @@ export default function SubjectiveEvaluation() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        footer img {
-          margin-left: 0.5rem;
-        }
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-decoration: none;
-          color: inherit;
-        }
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family:
-            Menlo,
-            Monaco,
-            Lucida Console,
-            Liberation Mono,
-            DejaVu Sans Mono,
-            Bitstream Vera Sans Mono,
-            Courier New,
-            monospace;
-        }
+        }  
       `}</style>
 
       <style jsx global>{`

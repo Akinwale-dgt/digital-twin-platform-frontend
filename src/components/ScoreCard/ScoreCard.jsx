@@ -27,7 +27,6 @@ const IndicatorWrapper = styled(Box)(({ value }) => ({
 const CognitiveWorkloadBar = ({ label, value }) => {
   // Normalize the value to a percentage
   const normalizedValue = (value / 20) * 100; // Assuming 7 is the max score
-  console.log(normalizedValue)
 
   return (
     <Box sx={{ width: '100%', maxWidth: 600, margin: '0 auto', mb: 4 }}>
@@ -54,7 +53,6 @@ const CognitiveWorkloadChart = (props) => {
   const {data} = props
 
   const cognitiveWorkload  = data;
-  console.log(data)
 
   return (
     <Box sx={{ p: 4 }}>

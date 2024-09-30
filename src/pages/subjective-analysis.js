@@ -18,8 +18,8 @@ export default function SubjectiveEvaluation() {
           Subjective Analysis
         </Typography> */}
         <h1 className={styles.title}>
-         <SubjectiveAnalysisComponent/>
         </h1>
+         <SubjectiveAnalysisComponent/>
       </main>
 
       <style jsx>{`

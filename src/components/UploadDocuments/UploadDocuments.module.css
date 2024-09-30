@@ -1,0 +1,72 @@
+.uploadDiv {
+  border-style: none;
+  padding: 35px 55px 10px;
+  border-radius: 5px;
+  width: auto;
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 25px;
+  height: 170px;
+  border: 1px #373a36 solid;
+}
+
+.uploadDiv p {
+  text-align: center;
+}
+
+.uploadCta {
+  background-color: #ef4e21;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 10px auto 40px;
+}
+
+.uploadCta:hover {
+  background-color: #20272b;
+}
+
+.uploadDivInner svg {
+  width: 100%;
+}
+
+.uploadDivInner {
+  margin: 0 auto;
+  width: 70px;
+}
+
+.fileRejectionList {
+  padding: 0;
+  text-align: center;
+}
+
+.fileRejectionList li {
+  color: #ef4e21;
+}
+
+.fileSizeText {
+  text-align: center;
+  color: #ef4e21;
+  margin-top: 15px;
+}
+
+.fileRejectionText {
+  width: 374px;
+  margin: 0 auto;
+}
+
+.browseText {
+  text-decoration: underline;
+  color: #483ea8;
+}
+
+@media (max-width: 1024px) {
+  .uploadDiv {
+    width: auto;
+  }
+}
+

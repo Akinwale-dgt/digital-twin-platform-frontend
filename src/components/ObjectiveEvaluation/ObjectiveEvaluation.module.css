@@ -1,0 +1,15 @@
+.stepperButtonSection {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0px 60px 0px 0px;
+}
+
+.stepperButtonSection button {
+  background: #0070f3;
+  color: #ffffff;
+  padding: 14px 38px;
+  border-radius: 15px;
+  font-weight: 800;
+  min-width: 150px;
+  margin: 0px 0px 0px 15px
+}

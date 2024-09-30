@@ -1,9 +1,7 @@
 import React from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-import axios from 'axios';
 import styles from './FirstStep.module.css'
-import Header from '../../../Header/Header'
 
 // Register necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -13,8 +11,6 @@ const FirstStepAnalysis = (props) => {
   const{data} = props;
 
   const newData =data?.data?.discomfort
-
-  console.log(newData)
 
   // Data for the bar chart
   const barChartData = {
@@ -46,50 +42,6 @@ const FirstStepAnalysis = (props) => {
     ],
   };
 
-  // Data for the pie chart
-  const pieChartData = {
-    labels: [
-      "Hand & Wait",
-      "Upper Arm",
-      "Shoulder",
-      "Lower Back",
-      "Thigh",
-      "Neck",
-      "Lower Leg & Foot"
-    ],
-    datasets: [
-      {
-        label: "Averages",
-        data: [
-          newData?.average_hand_and_wait,
-          newData?.average_upper_arm,
-          newData?.average_shoulder,
-          newData?.average_lower_back,
-          newData?.average_thigh,
-          newData?.average_neck,
-          newData?.average_lower_leg_and_foot
-        ],
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF6384",
-        ],
-        hoverBackgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-          "#FF6384",
-        ],
-      },
-    ],
-  };
 
    const barChartOptions = {
     maintainAspectRatio: false,  // This allows control over height
@@ -107,10 +59,10 @@ const FirstStepAnalysis = (props) => {
         </div>
 
         {/* Column 2 - Pie Chart */}
-        <div className={styles.colmd}>
+        {/* <div className={styles.colmd}>
           <h3>Perceived Rate of Discomfort Overview</h3>
           <Pie data={pieChartData} />
-        </div>
+        </div> */}
 
         {/* Column 3 - Summary */}
       </div>

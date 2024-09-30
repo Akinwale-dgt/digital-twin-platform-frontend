@@ -6,10 +6,14 @@ import StepButton from '@mui/material/StepButton';
 import Button from '@mui/material/Button';
 import FirstStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/FirstStep/FirstStep'
 import SecondStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/SecondStep/SecondStep'
+import ThirdStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/ThirdStep/ThirdStep'
+import FourthStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/FourthStep/FourthStep'
+import FifthStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/FifthStep/FifthStep'
 import styles from '../../components/SubjectiveEvaluation/SubjectiveEvaluation.module.css'
+import SixthStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/SixthStep/SixthStep'
 import axios from 'axios';
 
-const steps = ['Perceived Level of Discomfort', 'Cognitive Workload', 'Exertion', 'Balance',  'Situational Awareness', 'Overall Analysis'];
+const steps = ['Perceived Level of Discomfort', 'Cognitive Workload', 'Balance', 'Exertion', 'Situational Awareness', 'Overall Analysis'];
 
 function renderStepContent(
   step,
@@ -26,15 +30,19 @@ function renderStepContent(
       );
     case 2:
       return (
-          ' <ThirdStepForm/>'
+           <ThirdStepAnalysis data={data}/>
       );
       case 3:
       return (
-          '<FourthStepForm/>'
+          <FourthStepAnalysis data={data}/>
       );
       case 4:
       return (
-          ' <FifthStepForm/>'
+           <FifthStepAnalysis  data={data} />
+      );
+         case 5:
+      return (
+           <SixthStepAnalysis  data={data} />
       );
     default:
       return <div>Not Found</div>;
@@ -94,19 +102,6 @@ export default function SubjectiveAnalysisComponent() {
 
   const handleStep = (step) => () => {
     setActiveStep(step);
-  };
-
-  // const handleComplete = () => {
-  //   setCompleted({
-  //     ...completed,
-  //     [activeStep]: true,
-  //   });
-  //   handleNext();
-  // };
-
-  const handleReset = () => {
-    setActiveStep(0);
-    setCompleted({});
   };
 
   return (
