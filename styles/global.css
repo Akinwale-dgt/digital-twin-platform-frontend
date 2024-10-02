@@ -34,3 +34,12 @@ img {
 .css-rsks93-MuiPaper-root-MuiDialog-paper{
   padding: 30px;
 }
+
+.highcharts-title, .highcharts-credits {
+  display: none;
+}
+
+.MuiStepLabel-label {
+  font-size: 18px;
+  font-weight: 600;
+}

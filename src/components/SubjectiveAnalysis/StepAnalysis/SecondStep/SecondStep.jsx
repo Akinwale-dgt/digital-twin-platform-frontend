@@ -1,8 +1,7 @@
 import React from "react";
-import { Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import styles from '../FirstStep/FirstStep.module.css'
-import CognitiveWorkloadChart from '../../../ScoreCard/ScoreCard'
+import BulletGraph from '../../../BulletGraph/BulletGraph'
 
 // Register necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -12,8 +11,7 @@ const SecondStepAnalysis = (props) => {
   const{data} = props;
 
 
-  const newData =data?.data?.cognitiveWorkload
-
+  const cognitiveWorkload =data?.data?.cognitiveWorkload
 
   return (
     <>
@@ -21,8 +19,13 @@ const SecondStepAnalysis = (props) => {
       <div className={styles.container}>
      
         <div className={styles.colmd}>
-             <h3>Cognitive Workload Overview</h3>
-          <CognitiveWorkloadChart data={newData}/>
+          <h3>Cognitive Workload Overview</h3>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_mental_demand)} title={'Mental Demand'}/>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_physical_demand)} title={'Physical Demand'}/>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_temporal_demand)} title={'Temporal Demand'}/>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_performance)} title={'Performance'}/>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_effort)} title={'Effort'}/>
+          <BulletGraph value={Math.round(cognitiveWorkload?.average_frustration)} title={'Frustration'}/>
         </div>
       </div>
       

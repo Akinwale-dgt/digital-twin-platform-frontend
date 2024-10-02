@@ -1,10 +1,9 @@
-import GuageCard from "../../../Guage/Guage";
 import React from "react";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import styles from '../FirstStep/FirstStep.module.css'
+import GaugeChart from "../../../GuageChart/GuageChart";
+
 
 // Register necessary chart components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 
 const ThirdStepAnalysis = (props) => {
@@ -16,8 +15,7 @@ const ThirdStepAnalysis = (props) => {
     <div className={styles.main}>
       <div className={styles.container}>
         <div className={styles.colmd2}>
-             <h3>Perceived Balance Analysis</h3>
-          <GuageCard data={balanceData.totalAverage} valueMax={10}/>
+          <GaugeChart value={balanceData?.totalAverage} maxValue={10} text={'Perceived Balance Analysis'} />
         </div>
       </div>
     </div>

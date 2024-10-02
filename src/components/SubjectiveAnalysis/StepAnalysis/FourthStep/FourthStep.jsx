@@ -1,6 +1,6 @@
-import GuageCard from "../../../Guage/Guage";
 import React from "react";
 import styles from '../FirstStep/FirstStep.module.css'
+import GaugeChart from "../../../GuageChart/GuageChart";
 
 
 const FourthStepAnalysis = (props) => {
@@ -13,8 +13,7 @@ const FourthStepAnalysis = (props) => {
     <div className={styles.main}>
       <div className={styles.container}>
         <div className={styles.colmd2}>
-             <h3>Perceived Exertion Rate Analysis</h3>
-          <GuageCard data={exertionData.totalAverage} valueMax={20} />
+          <GaugeChart value={exertionData?.totalAverage} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
         </div>
       </div>
     </div>
