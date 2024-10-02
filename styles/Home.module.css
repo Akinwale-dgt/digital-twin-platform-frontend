@@ -149,6 +149,12 @@
   height: 500px;
 }
 
+.modelColumn {
+  height: 80vh;
+   flex-basis: 30%;
+  width: 90vw;
+}
+
 .column canvas {
   width: 100%;
   max-height: 300px;

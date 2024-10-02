@@ -4,14 +4,14 @@ import styles from '../../styles/Home.module.css';
 import {Button} from '@mui/material'
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
-import { useState } from "react";
-import { Data } from '../data'
+import ModelViewer from '../components/ModelViewer/ModelViewer';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router'
+import GaugeChart from '../components/GuageChart/GuageChart.jsx'
 
 
 export default function Home() {
@@ -21,25 +21,6 @@ export default function Home() {
 
   const router = useRouter()
   Chart.register(CategoryScale);
-  const [chartData, setChartData] = useState({
-    labels: Data.map((data) => data.year), 
-    datasets: [
-      {
-        minBarLength: 50,
-        label: "Users Gained ",
-        data: Data.map((data) => data.userGain),
-        backgroundColor: [
-          "rgba(75,192,192,1)",
-          "#ecf0f1",
-          "#50AF95",
-          "#f3ba2f",
-          "#2a71d0"
-        ],
-        borderColor: "black",
-        borderWidth: 2
-      }
-    ]
-  });
 
   const [open, setOpen] = React.useState(false);
     const [openAnalysis, setAnalysisOpen] = React.useState(false);
@@ -122,27 +103,27 @@ export default function Home() {
     });
 
     // Bar Chart 2
-    const barChart2Canvas = document.getElementById('barChart2');
-    barChart2Canvas.height = 500; // Set bar chart height in pixels
-    const ctxBar2 = barChart2Canvas.getContext('2d');
-    barChart2Ref.current = new Chart(ctxBar2, {
-      type: 'bar',
-      data: {
-        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        datasets: [{
-          label: 'Revenue',
-          data: [22, 29, 15, 10],
-          backgroundColor: 'rgba(153, 102, 255, 0.6)',
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
+    // const barChart2Canvas = document.getElementById('barChart2');
+    // barChart2Canvas.height = 500; // Set bar chart height in pixels
+    // const ctxBar2 = barChart2Canvas.getContext('2d');
+    // barChart2Ref.current = new Chart(ctxBar2, {
+    //   type: 'bar',
+    //   data: {
+    //     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    //     datasets: [{
+    //       label: 'Revenue',
+    //       data: [22, 29, 15, 10],
+    //       backgroundColor: 'rgba(153, 102, 255, 0.6)',
+    //     }]
+    //   },
+    //   options: {
+    //     scales: {
+    //       y: {
+    //         beginAtZero: true
+    //       }
+    //     }
+    //   }
+    // });
 
     // Cleanup on component unmount
     return () => {
@@ -228,15 +209,18 @@ export default function Home() {
             <h2>Perceived Rate of Discomfort</h2>
             <canvas id="barChart1"></canvas>
           </div>
-           <div className={styles.column}>
+          <div className={styles.column}>
             <h2>Situational Awareness</h2>
             <canvas id="pieChart"></canvas>
           </div>
           <div className={styles.column}>
-            <h2>Bar Chart 2</h2>
-            <canvas id="barChart2"></canvas>
+            <h2>Perceived Exertion Rate</h2>
+              <GaugeChart value={17.5} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
           </div>
+         
+        
         </div>
+       
       </main>
 
       <style jsx>{`

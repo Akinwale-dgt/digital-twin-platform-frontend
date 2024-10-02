@@ -12,7 +12,7 @@
     "@mui/material": "^6.1.0",
     "@mui/x-charts": "^7.18.0",
     "@react-three/drei": "^9.114.0",
-    "@react-three/fiber": "^8.17.8",
+    "@react-three/fiber": "^8.17.9",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
     "chartjs": "^0.3.24",

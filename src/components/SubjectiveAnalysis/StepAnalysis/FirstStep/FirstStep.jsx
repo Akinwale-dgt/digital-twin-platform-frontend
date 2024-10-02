@@ -2,6 +2,7 @@ import React from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import styles from './FirstStep.module.css'
+import ModelViewer from '../../../../components/ModelViewer/ModelViewer'
 
 // Register necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -51,24 +52,18 @@ const FirstStepAnalysis = (props) => {
     <>
     <div className={styles.main}>
       <div className={styles.container}>
-        {/* Column 1 - Bar Chart */}
+          <div className={styles.colmd2} style={{padding: 0}}>
+          {/* <h3>Perceived Rate of Discomfort Overview</h3>
+           <div className={styles.modelColumn}> */}
+            <ModelViewer />
+          {/* </div> */}
+        </div>
         <div className={styles.colmd}>
           <h3>Perceived Rate of Discomfort Representation</h3>
           <Bar data={barChartData} options={barChartOptions} height={500} />
         </div>
 
-        {/* Column 2 - Pie Chart */}
-        {/* <div className={styles.colmd}>
-          <h3>Perceived Rate of Discomfort Overview</h3>
-          <Pie data={pieChartData} />
-        </div> */}
-
-        {/* Column 3 - Summary */}
       </div>
-        {/* <div>
-          <h3>Summary</h3>
-          <p>Total Average: {newData?.totalAverage.toFixed(2)}</p>
-        </div> */}
     </div>
     </>
   );

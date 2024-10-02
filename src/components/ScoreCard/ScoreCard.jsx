@@ -25,7 +25,7 @@ const IndicatorWrapper = styled(Box)(({ value }) => ({
 }));
 
 // CognitiveWorkloadBar component for each data point
-const CognitiveWorkloadBar = ({ label, value }) => {
+export const CognitiveWorkloadBar = ({ label, value }) => {
   // Normalize the value to a percentage
   const normalizedValue = (value / 20) * 100; // Assuming 7 is the max score
 
