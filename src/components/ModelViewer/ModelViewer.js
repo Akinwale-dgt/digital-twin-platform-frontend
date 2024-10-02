@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -13,10 +13,14 @@ function Model() {
 const ModelViewer = () => {
   return (
     <Canvas>
-      <ambientLight intensity={1.5} />
+      <ambientLight intensity={1.25} />
+      <ambientLight intensity={0.1} />
+      <directionalLight intensity={0.4} />
       <pointLight position={[10, 10, 10]} /> 
       <OrbitControls />
-      <Model />
+      <Suspense fallback={null}>
+       <Model position={[0.025, -0.9, 1]} />
+      </Suspense>
     </Canvas>
   );
 };
