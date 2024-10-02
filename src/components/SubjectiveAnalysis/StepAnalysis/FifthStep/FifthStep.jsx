@@ -61,16 +61,9 @@ const FifthStepAnalysis = (props) => {
   return (
     <>
     <div className={styles.main}>
-        <h6>Situational Awareness Analysis</h6>
       <div className={styles.container}>
-        {/* Column 1 - Bar Chart */}
-        {/* <div className={styles.colmd}>
-          <h3>Perceived Exertion Rate Architecture</h3>
-          <Bar data={barChartData} options={barChartOptions} height={500} />
-        </div> */}
-        {/* Column 2 - Summary */}
-        <div className={styles.colmd}>
-          <h3>Situational Awareness Rate</h3>
+        <div className={styles.colmd} style={{ backgroundColor: 'none'}}>
+          <h3>Situational Awareness Analysis</h3>
           <Pie data={pieChartData} />
         </div> 
       </div>

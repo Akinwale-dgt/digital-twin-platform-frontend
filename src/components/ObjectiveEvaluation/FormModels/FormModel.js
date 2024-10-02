@@ -1,8 +1,8 @@
 export default {
   formId: 'objectiveEvaluation',
   formField: {
-    cognitiveWorkload: {
-      name: 'cognitiveWorkload',
+    cognitiveWorkloads: {
+      name: 'cognitiveWorkloads',
       label: 'Cognitive*',
       requiredErrorMsg: 'Cognitive workload file is required',
     },

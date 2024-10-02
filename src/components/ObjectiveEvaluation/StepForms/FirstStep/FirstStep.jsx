@@ -15,19 +15,19 @@ export const DisplayDocument = (props) => (
   <>
     {Array.isArray(props.files) && props.files.length > 0 &&
       props.files.map((file, index) => (
-        <div key={index.toString()} className={styles.mainSection}>
-          <div className={styles.selectedSectionInner}>
-            <div>
+        <Box key={index.toString()} className={styles.mainSection}>
+          <Box className={styles.selectedSectionInner}>
               <TextSnippetIcon className={styles.documentIcon} color="primary" />
-              <span className={styles.documentTitle}>{(file.name)}</span>
-              <div className={styles.documentInfoSection}>
-                <span>@Type: {(file.type)}</span>
+              <Typography gutterBottom variant="p" component="div">
+                File Name: {(file.name)}
+              </Typography>
+              <div>
+                <Typography variant="p">File Type: {(file.type)}</Typography>
                 <br />
-                <span> {`Size: ${bytesToMegaBytes(file.size)} MB`}</span>
-              </div>
+                <Typography variant="p"> {`File Size: ${bytesToMegaBytes(file.size)} MB`}</Typography>
             </div>
-          </div>
-        </div>
+          </Box>
+        </Box>
       ))}
   </>
 );
@@ -37,34 +37,30 @@ export default function FirstStepForm(props) {
 
   const { setFieldValue, values } = props;
 
-  console.log(values);
-
   return (
     <React.Fragment>
       <Box container spacing={3} className={styles.main}>
-        <Typography variant='p' sx={{textAlign: 'center', fontSize:'14px'}}>Upload EEG Data
+        <Typography variant='h5' sx={{textAlign: 'center', fontSize:'24px'  }}>Upload EEG Data
         </Typography>
         <Box sx={{display: 'flex', justifyContent: 'space-evenly'}}>
             <Box>
-              <UploadComponent name={"cognitiveWorkload"} fileSize={FILE_SIZE} setFieldValue={setFieldValue} />
-            </Box>
+              <UploadComponent name={"cognitiveWorkloads"} fileSize={FILE_SIZE} setFieldValue={setFieldValue} acceptFileTypes={{'application/csv': ['.csv', '.xlsx']}} />
               <ErrorMessage
                 component="span"
-                name={"cognitiveWorkload"}
+                name={"cognitiveWorkloads"}
                 className={styles.errorSection}
               />
+            </Box>
             <Box>
-            {Array.isArray(values.cognitiveWorkload) && values.cognitiveWorkload.length > 0 && (
-                <div className={styles.mainDocumentSection}>
-                  <Card sx={{ minWidth: 275 }}>
-                    <Typography variant='p' className={styles.selectedSection}>
+            {Array.isArray(values.cognitiveWorkloads) && values.cognitiveWorkloads.length > 0 && (
+                  <Card sx={{ minWidth: 400, padding: '10px 20px', backgroundColor: '#0070f3', color: '#fff' }}>
+                    <Typography variant='h5' className={styles.selectedSection}>
                       {'Selected File'}
                     </Typography>
                     <CardContent>
-                    <DisplayDocument files={values.cognitiveWorkload} />
+                    <DisplayDocument files={values.cognitiveWorkloads} />
                     </CardContent>
                   </Card>
-                </div>
               )}
             </Box>
         </Box>

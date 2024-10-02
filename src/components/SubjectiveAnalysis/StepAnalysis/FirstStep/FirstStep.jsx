@@ -15,7 +15,7 @@ const FirstStepAnalysis = (props) => {
   // Data for the bar chart
   const barChartData = {
     labels: [
-      "Hand & Wait",
+      "Hand & Wrist",
       "Upper Arm",
       "Shoulder",
       "Lower Back",
@@ -50,7 +50,6 @@ const FirstStepAnalysis = (props) => {
   return (
     <>
     <div className={styles.main}>
-        <h6>Perceived Rate of Discomfort Analysis</h6>
       <div className={styles.container}>
         {/* Column 1 - Bar Chart */}
         <div className={styles.colmd}>

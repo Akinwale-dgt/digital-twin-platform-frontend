@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import LinearProgress from '@mui/material/LinearProgress';
 import { styled } from '@mui/system';
+import Tooltip from '@mui/material/Tooltip';
 
 // Gradient ProgressBar styling
 const GradientProgress = styled(LinearProgress)(({ theme }) => ({
@@ -20,7 +21,7 @@ const IndicatorWrapper = styled(Box)(({ value }) => ({
   position: 'relative',
   height: '30px',
   marginTop: '-25px', // Adjust arrow placement above the bar
-  left: `${value-50}%`, // Position based on value
+  left: `${value - 25}%`, // Position based on value
 }));
 
 // CognitiveWorkloadBar component for each data point
@@ -39,9 +40,11 @@ const CognitiveWorkloadBar = ({ label, value }) => {
 
       {/* Arrow indicator */}
       <IndicatorWrapper value={normalizedValue}>
-        <ArrowDropUpIcon
-          sx={{ fontSize: 30, color: '#8bc34a' }} // Customize arrow color
-        />
+          <Tooltip title={`${Math.floor(value) }`} placement="right-start">
+            <ArrowDropUpIcon
+              sx={{ fontSize: 30, color: '#8bc34a', marginTop: '18px' }} // Customize arrow color
+            />
+          </Tooltip>
       </IndicatorWrapper>
     </Box>
   );

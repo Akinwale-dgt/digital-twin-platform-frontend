@@ -6,16 +6,12 @@ import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import { useState } from "react";
 import { Data } from '../data'
-import PieChart from "../components/piechart";
-import {BarChart} from "../components/barchart";
-import Image from 'next/image'
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router'
-import HumanBody from '../images/vecteezy_silhouette-of-a-human-body_-min-Photoroom.png'
 
 
 export default function Home() {
@@ -71,12 +67,16 @@ export default function Home() {
     router.push('/subjective-evaluation');
   }
 
-    const visitSubjectiveAnalysis= () => {
+  const visitSubjectiveAnalysis= () => {
     router.push('/subjective-analysis');
   }
 
-    const visitOjectiveEvaluation = () => {
+  const visitOjectiveEvaluation = () => {
     router.push('/objective-evaluation');
+  }
+
+  const visitOjectiveAnalysis = () => {
+    console.log('Hello')
   }
 
   React.useEffect(() => {
@@ -90,7 +90,7 @@ export default function Home() {
     pieChartRef.current = new Chart(ctxPie, {
       type: 'pie',
       data: {
-        labels: ['Red', 'Blue', 'Yellow'],
+        labels: ['Arousal', 'Complexity of situation', 'Concentration of attention'],
         datasets: [{
           data: [300, 50, 100],
           backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
@@ -105,10 +105,10 @@ export default function Home() {
     barChart1Ref.current = new Chart(ctxBar1, {
       type: 'bar',
       data: {
-        labels: ['January', 'February', 'March', 'April'],
+        labels: ['Hand & Wrist', 'Upper Arm', 'Shoulder', 'Lower Back', 'Thigh', 'Lower Leg & Foot'],
         datasets: [{
-          label: 'Sales',
-          data: [12, 19, 3, 5],
+          label: 'Ratings',
+          data: [12, 19, 3, 5, 10, 4],
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
         }]
       },
@@ -155,7 +155,11 @@ export default function Home() {
   return (
     <>
       <Dialog
-        sx={{padding: '30px'}}
+        PaperProps={{
+          style: {
+            padding: '30px'
+        },
+       }}
         fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
@@ -174,7 +178,11 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <Dialog
-        sx={{padding: '30px'}}
+          PaperProps={{
+          style: {
+            padding: '30px'
+        },
+       }}
         fullScreen={fullScreen}
         open={openAnalysis}
         onClose={handleCloseDialog}
@@ -187,7 +195,7 @@ export default function Home() {
           <Button autoFocus  onClick={visitSubjectiveAnalysis}>
             Subjective 
           </Button>
-          <Button  onClick={visitOjectiveEvaluation} autoFocus>
+          <Button  onClick={visitOjectiveAnalysis} autoFocus>
             Objective 
           </Button>
         </DialogContent>
@@ -217,11 +225,11 @@ export default function Home() {
         </div>
         <div className={styles.container}>
           <div className={styles.column}>
-            <h2>Bar Chart 1</h2>
+            <h2>Perceived Rate of Discomfort</h2>
             <canvas id="barChart1"></canvas>
           </div>
            <div className={styles.column}>
-            <h2>Pie Chart</h2>
+            <h2>Situational Awareness</h2>
             <canvas id="pieChart"></canvas>
           </div>
           <div className={styles.column}>

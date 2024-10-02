@@ -9,21 +9,13 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const FourthStepAnalysis = (props) => {
   const{data} = props;
-  const exertionData = data?.data?.exertion
-  console.log(data?.data)
+  const exertionData = data?.data?.weightedSumRating
 
   return (
     <>
     <div className={styles.main}>
-        <h6>Perceived Exertion Rate Analysis</h6>
       <div className={styles.container}>
-        {/* Column 1 - Bar Chart */}
-        {/* <div className={styles.colmd}>
-          <h3>Perceived Exertion Rate Architecture</h3>
-          <Bar data={barChartData} options={barChartOptions} height={500} />
-        </div> */}
-        {/* Column 2 - Summary */}
-        <div className={styles.colmd}>
+        <div className={styles.colmd2}>
              <h3>Overall Analysis</h3>
           <GuageCard data={exertionData} valueMax={100} />
         </div>

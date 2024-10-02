@@ -5,7 +5,7 @@ const GuageCard = (props) => {
 
 return(
   <Gauge
-    value={`${Math.floor(data.totalAverage)}`}
+    value={`${Math.floor(data)}`}
     startAngle={-110}
     endAngle={110}
     valueMax={valueMax}

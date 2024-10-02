@@ -17,6 +17,21 @@
   padding: 70px;
 }
 
+
+.colmd2 {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 10px;
+  flex-basis: 50%;
+  max-width: 45%;
+  text-align: center;
+  max-height: 700px;
+  padding: 50px;
+}
+
+
 .main h6 {
   margin: 0;
 }

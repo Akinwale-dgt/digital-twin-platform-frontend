@@ -27,6 +27,7 @@ export const SUPPORTED_FORMATS = [
   '.tiff',
   '.gif',
   '.ppt',
+  'xlsx'
 ];
 
 const UploadComponent = (props) => {

@@ -3,7 +3,7 @@ import FormModel from './FormModel';
 
 const {
   formField: {
-    cognitiveWorkload,
+    cognitiveWorkloads,
     fallRisk,
     exertion
   },
@@ -12,8 +12,8 @@ const {
 
 export default [
 Yup.object().shape({
-  [cognitiveWorkload.name]: Yup.array().min(1, cognitiveWorkload.requiredErrorMsg)
-    .required(cognitiveWorkload.requiredErrorMsg),
+  [cognitiveWorkloads.name]: Yup.array().min(1, cognitiveWorkloads.requiredErrorMsg)
+    .required(cognitiveWorkloads.requiredErrorMsg),
 }),
   Yup.object().shape({
   [fallRisk.name]: Yup.array().min(1, fallRisk.requiredErrorMsg)

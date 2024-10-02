@@ -13,7 +13,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function getSteps() {
-  const steps = ['Cognitive Workload', 'Exertion', 'Balance'];
+  const steps = ['Cognitive Workload', 'Fall Risk', 'Exertion'];
   return steps;
 }
 
@@ -29,11 +29,11 @@ function renderStepContent(
       );
     case 1:
       return (
-        ' <SecondStepForm/>'
+         <SecondStepForm setFieldValue={setFieldValue} values={values}/>
       );
     case 2:
       return (
-          ' <ThirdStepForm/>'
+          <ThirdStepForm setFieldValue={setFieldValue} values={values} />
       );
     default:
       return <div>Not Found</div>;
@@ -49,29 +49,23 @@ export default function ObjectiveEvaluationComponent() {
   const isLastStep = activeStep === steps.length - 1;
 
   const submitForm = (values) => {
-    axios.post('https://digital-twin-platform.onrender.com/api/situational-awareness', {
-    instability_of_situation: Number(values.instabilityOfSituation),
-    complexity_of_situation: Number(values.complexityOfSituation) ,
-    variability_of_situation: Number(values.variabilityOfSituation),
-    arousal: Number(values.arousal),
-    concentration_of_attention: Number(values.concentrationOfAttention),
-    division_of_attention: Number(values.divisionOfAttention),
-    spare_mental_capacity: Number(values.spareMentalCapacity),
-    familiarity_with_situation: Number(values.familiarityWithSituation),
-    information_quantity: Number(values.informationQuantity)
-  })
-  .then((response) => {
-    toast.success(response.data.message, {
-      position: "top-right"
-    });
-    setTimeout(() => {
-       router.push('/');
-    }, "2000");
-  }, (error) => {
-      console.log(error.message);
-      toast(error.message, {
+    const exertionRequestBody = new FormData();
+    exertionRequestBody.append('input-data', values.exertion[0])
+    exertionRequestBody.append('measure', 'exertion')
+
+    axios.post('https://digital-twin-platform.onrender.com/api/upload-file', exertionRequestBody)
+    .then((response) => {
+      toast.success('Files uploaded successfully', {
         position: "top-right"
-    });
+      });
+      setTimeout(() => {
+        router.push('/');
+      }, "2000");
+    }, (error) => {
+        console.log(error.message);
+        toast(error.message, {
+          position: "top-right"
+      });
     });
   };
 
@@ -79,32 +73,12 @@ export default function ObjectiveEvaluationComponent() {
     setActiveStep(activeStep - 1);
   };
 
-  const sendDiscomfortData =(values)=> {
-    axios.post('https://digital-twin-platform.onrender.com/api/discomfort', {
-    hand_and_waist: Number(values.handWrist),
-    upper_arm: Number(values.upperArm) ,
-    shoulder: Number(values.shoulder),
-    lower_back: Number(values.lowerBack),
-    thigh: Number(values.thigh),
-    lower_leg_and_foot: Number(values.lowerLegAndFoot),
-    neck: Number(values.neck)
-  })
-  .then((response) => {
-    console.log(response);
-  }, (error) => {
-      console.log(error);
-    });
-  }
-
 const sendCognitiveWorkloadData = (values) => {
-  axios.post('https://digital-twin-platform.onrender.com/api/cognitive-workload', {
-    mental_demand: Number(values.mentalDemand),
-    physical_demand: Number(values.physicalDemand) ,
-    temporal_demand: Number(values.temporalDemand),
-    performance: Number(values.performance),
-    effort: Number(values.effort),
-    frustration: Number(values.frustration),
-  })
+  const cognitiveWorkloadRequestBody = new FormData();
+  cognitiveWorkloadRequestBody.append('input-data', values.cognitiveWorkloads[0])
+  cognitiveWorkloadRequestBody.append('measure', 'cognitive-workload')
+
+  axios.post('https://digital-twin-platform.onrender.com/api/upload-file', cognitiveWorkloadRequestBody)
   .then((response)=> {
     console.log(response);
   },(error)=>{
@@ -112,21 +86,13 @@ const sendCognitiveWorkloadData = (values) => {
   })
 }
 
-const sendExertionData = (values) => {
-  axios.post('https://digital-twin-platform.onrender.com/api/exertion', {
-    rate_of_exertion: Number(values.exertion),
-  })
-  .then((response)=> {
-    console.log(response);
-  },(error)=>{
-    console.log(error)
-  })
-}
+const sendFallRiskData = (values) => {
+  const fallRiskRequestBody = new FormData();
+  console.log(values)
+  fallRiskRequestBody.append('input-data', values.fallRisk[0])
+  fallRiskRequestBody.append('measure', 'fall-risk')
 
-const sendBalanceData = (values) => {
-  axios.post('https://digital-twin-platform.onrender.com/api/balance', {
-    rate_of_balance: Number(values.balance),
-  })
+  axios.post('https://digital-twin-platform.onrender.com/api/upload-file', fallRiskRequestBody)
   .then((response)=> {
     console.log(response);
   },(error)=>{
@@ -144,28 +110,14 @@ const sendBalanceData = (values) => {
         actions.setSubmitting(false);
     }else if(activeStep === 0) {
        actions.setSubmitting(true);
-       console.log(values)
-      //  sendDiscomfortData(values)
+       sendCognitiveWorkloadData(values)
        setActiveStep(activeStep +1);
         actions.setSubmitting(false);
     }else if (activeStep === 1) {
       actions.setSubmitting(true);
-        console.log(values)
-      // sendCognitiveWorkloadData(values);
-      //  setActiveStep(activeStep +1);
-       actions.setSubmitting(false);
-    }else if (activeStep === 2) {
-      actions.setSubmitting(true);
-        console.log(values)
-      // sendExertionData(values);
-      //  setActiveStep(activeStep +1);
-       actions.setSubmitting(false);
-    }else if (activeStep === 3) {
-      actions.setSubmitting(true);
-        console.log(values)
-      // sendBalanceData(values);
-      //  setActiveStep(activeStep +1);
-       actions.setSubmitting(false);
+      sendFallRiskData(values);
+      setActiveStep(activeStep +1);
+      actions.setSubmitting(false);
     }
   };
 
@@ -188,7 +140,7 @@ const sendBalanceData = (values) => {
         ) : (
           <Formik
              initialValues={{
-              congnitiveWorkload: [],
+              cognitiveWorkloads: [],
               exertion: [],
               fallRisk: [],
           }}
