@@ -12,7 +12,7 @@ function Model() {
 
 const ModelViewer = () => {
   return (
-    <Canvas>
+    <Canvas   camera={{ position: [-10, 25, 20.25], fov: 10 }}>
       <ambientLight intensity={1.25} />
       <ambientLight intensity={0.1} />
       <directionalLight intensity={0.4} />
