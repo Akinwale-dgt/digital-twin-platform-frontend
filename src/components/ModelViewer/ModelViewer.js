@@ -35,14 +35,14 @@ function Model(props) {
     <>
       <primitive object={gltf.scene} ref={modelRef} scale={[2, 1.6, 2]}>;
       {
-        lowerBack && 
+        lowerBack && lowerBackHighlightLevel &&
         <mesh position={backNode?.position}>
             <sphereGeometry args={[0.1, 32, 32]} />
             <meshStandardMaterial color={lowerBackHighlightColor} />
         </mesh>
       }
       {
-        cognitive && 
+        cognitive && cognitiveLevel &&
         <mesh position={headNode?.position}>
             <sphereGeometry args={[0.1, 32, 32]} />
             <meshStandardMaterial color={cognitiveLevelColor} />
