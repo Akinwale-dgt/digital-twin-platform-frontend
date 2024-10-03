@@ -21,8 +21,8 @@ const {title, value } = props;
     chart: {
       type: 'bullet',
       inverted: true,
-      height: '15%',
-       width: 600
+      height: '10%',
+       width: 800
     },
     title: {
       text: 'Cognitive Workload Overview',

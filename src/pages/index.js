@@ -2,8 +2,6 @@ import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 import {Button} from '@mui/material'
-import Chart from "chart.js/auto";
-import { CategoryScale } from "chart.js";
 import ModelViewer from '../components/ModelViewer/ModelViewer';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,15 +10,20 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router'
 import GaugeChart from '../components/GuageChart/GuageChart.jsx'
+import axios from 'axios';
+import { Bar, Pie } from "react-chartjs-2";
+import BulletGraph from '../components/BulletGraph/BulletGraph';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
+// Register necessary chart components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 export default function Home() {
-  const pieChartRef = React.useRef(null);
-  const barChart1Ref = React.useRef(null);
-  const barChart2Ref = React.useRef(null);
+  const router = useRouter();
 
-  const router = useRouter()
-  Chart.register(CategoryScale);
+   const barChartOptions = {
+    maintainAspectRatio: false,  // This allows control over height
+  };
 
   const [open, setOpen] = React.useState(false);
     const [openAnalysis, setAnalysisOpen] = React.useState(false);
@@ -38,6 +41,114 @@ export default function Home() {
 
   const handleCloseDialog = () => {
     setAnalysisOpen(false);
+  };
+
+
+  const [data, setData] = React.useState({});
+
+  const getAnalysisResult = () => {
+  axios.get('https://digital-twin-platform.onrender.com/api/analyze-subjective-data')
+    .then((response) => {
+      setData(response.data);
+    })
+    .catch((error) => {
+      console.log(error.message);
+      toast(error.message, {
+        position: "top-right",
+      });
+    })
+    .finally(() => {
+      handleCloseDialog();
+    });
+};
+
+  console.log(data);
+
+
+  const discomfortData =data?.data?.discomfort
+
+  // Data for the bar chart
+  const barChartData = {
+    labels: [
+      "Hand & Wrist",
+      "Upper Arm",
+      "Shoulder",
+      "Lower Back",
+      "Thigh",
+      "Neck",
+      "Lower Leg & Foot"
+    ],
+    datasets: [
+      {
+        label: "Ratings",
+        data: [
+          discomfortData?.average_hand_and_wait,
+          discomfortData?.average_upper_arm,
+          discomfortData?.average_shoulder,
+          discomfortData?.average_lower_back,
+          discomfortData?.average_thigh,
+          discomfortData?.average_neck,
+          discomfortData?.average_lower_leg_and_foot
+        ],
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+   const situationalData = data?.data?.situational_awareness
+   const balanceData = data?.data?.balance
+   const exertionData = data?.data?.exertion
+   const cognitiveWorkload =data?.data?.cognitiveWorkload
+     const weightedSumRating = data?.data?.weightedSumRating
+
+    // Data for the pie chart
+
+   const pieChartData = {
+    labels: [
+      "Arousal",
+      "Complexity of situation",
+      "Concentration of attention",
+      "Familiarity with situation",
+      "Information quantity",
+      "Instability of situation",
+      "Spare mental capacity",
+      "Variability of situation"
+    ],
+    datasets: [
+      {
+        label: "Situational Awareness Rate",
+        data: [
+          situationalData?.average_arousal,
+          situationalData?.average_complexity_of_situation,
+          situationalData?.average_concentration_of_attention,
+          situationalData?.average_familiarity_with_situation,
+          situationalData?.average_information_quantity,
+          situationalData?.average_instability_of_situation,
+          situationalData?.average_spare_mental_capacity,
+          situationalData?.average_variability_of_situation,
+        ],
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+          "#FF6384",
+        ],
+        hoverBackgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+          "#FF6384",
+        ],
+      },
+    ],
   };
 
   const handleClickOpenDialog = () => {
@@ -60,78 +171,6 @@ export default function Home() {
     console.log('Hello')
   }
 
-  React.useEffect(() => {
-    // Destroy the previous chart instances if they exist
-    if (pieChartRef.current) pieChartRef.current.destroy();
-    if (barChart1Ref.current) barChart1Ref.current.destroy();
-    if (barChart2Ref.current) barChart2Ref.current.destroy();
-
-    // Pie Chart
-    const ctxPie = document.getElementById('pieChart').getContext('2d');
-    pieChartRef.current = new Chart(ctxPie, {
-      type: 'pie',
-      data: {
-        labels: ['Arousal', 'Complexity of situation', 'Concentration of attention'],
-        datasets: [{
-          data: [300, 50, 100],
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-        }]
-      }
-    });
-
-    // Bar Chart 1
-    const barChart1Canvas = document.getElementById('barChart1');
-    barChart1Canvas.height = 500; // Set bar chart height in pixels
-    const ctxBar1 = barChart1Canvas.getContext('2d');
-    barChart1Ref.current = new Chart(ctxBar1, {
-      type: 'bar',
-      data: {
-        labels: ['Hand & Wrist', 'Upper Arm', 'Shoulder', 'Lower Back', 'Thigh', 'Lower Leg & Foot'],
-        datasets: [{
-          label: 'Ratings',
-          data: [12, 19, 3, 5, 10, 4],
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    // Bar Chart 2
-    // const barChart2Canvas = document.getElementById('barChart2');
-    // barChart2Canvas.height = 500; // Set bar chart height in pixels
-    // const ctxBar2 = barChart2Canvas.getContext('2d');
-    // barChart2Ref.current = new Chart(ctxBar2, {
-    //   type: 'bar',
-    //   data: {
-    //     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-    //     datasets: [{
-    //       label: 'Revenue',
-    //       data: [22, 29, 15, 10],
-    //       backgroundColor: 'rgba(153, 102, 255, 0.6)',
-    //     }]
-    //   },
-    //   options: {
-    //     scales: {
-    //       y: {
-    //         beginAtZero: true
-    //       }
-    //     }
-    //   }
-    // });
-
-    // Cleanup on component unmount
-    return () => {
-      if (pieChartRef.current) pieChartRef.current.destroy();
-      if (barChart1Ref.current) barChart1Ref.current.destroy();
-      if (barChart2Ref.current) barChart2Ref.current.destroy();
-    };
-  }, []);
 
   return (
     <>
@@ -173,7 +212,7 @@ export default function Home() {
           {"Choose your preferred data evaluation analysis"}
         </DialogTitle>
         <DialogContent className={styles.dialogContent}>
-          <Button autoFocus  onClick={visitSubjectiveAnalysis}>
+          <Button autoFocus  onClick={getAnalysisResult}>
             Subjective 
           </Button>
           <Button  onClick={visitOjectiveAnalysis} autoFocus>
@@ -207,20 +246,39 @@ export default function Home() {
         <div className={styles.container}>
           <div className={styles.column}>
             <h2>Perceived Rate of Discomfort</h2>
-            <canvas id="barChart1"></canvas>
+            <Bar data={barChartData} options={barChartOptions} height={500} />
+          </div>
+          <div className={styles.modelColumn}>
+              <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
           </div>
           <div className={styles.column}>
-            <h2>Situational Awareness</h2>
-            <canvas id="pieChart"></canvas>
+            <h2>Perceived Balance Analysis</h2>
+              <GaugeChart value={balanceData?.totalAverage} maxValue={10} text={'Perceived Balance Analysis'} />
           </div>
+        </div>
+        <div className={styles.container}>
           <div className={styles.column}>
             <h2>Perceived Exertion Rate</h2>
-              <GaugeChart value={17.5} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
+             <GaugeChart value={exertionData?.totalAverage} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
           </div>
-         
-        
+          <div className={styles.column}>
+            <h2>Situational Awareness</h2> 
+            <Pie data={pieChartData} />
+          </div>
+            <div  className={styles.column}>
+            <h2>Overall Analysis</h2>
+              <GaugeChart value={weightedSumRating} maxValue={100} text={'Overall Analysis'} />
+          </div>
+          <div className={styles.cognitiveCol}>
+              <h2>Cognitive Workload Overview</h2>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_mental_demand)} title={'Mental Demand'}/>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_physical_demand)} title={'Physical Demand'}/>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_temporal_demand)} title={'Temporal Demand'}/>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_performance)} title={'Performance'}/>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_effort)} title={'Effort'}/>
+              <BulletGraph value={Math.round(cognitiveWorkload?.average_frustration)} title={'Frustration'}/>
+          </div>
         </div>
-       
       </main>
 
       <style jsx>{`
