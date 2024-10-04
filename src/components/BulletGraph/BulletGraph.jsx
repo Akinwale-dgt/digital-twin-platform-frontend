@@ -21,8 +21,8 @@ const {title, value } = props;
     chart: {
       type: 'bullet',
       inverted: true,
-      height: '10%',
-       width: 800
+      height: '15%',
+       width: 400
     },
     title: {
       text: 'Cognitive Workload Overview',
@@ -34,7 +34,7 @@ const {title, value } = props;
       },
     },
     yAxis: {
-      min: 0,
+      min: 1,
       max: 10,
       plotBands: [
               {

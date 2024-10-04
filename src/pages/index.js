@@ -226,10 +226,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="#">Twin Digital Platform!</a>
-        </h1>
+      <main className={styles.main} style={{marginBottom: '20px'}}>
         <div className={styles.buttonSection}>
           <div>
 
@@ -245,31 +242,33 @@ export default function Home() {
         </div>
         <div className={styles.container}>
           <div className={styles.column}>
-            <h2>Perceived Rate of Discomfort</h2>
-            <Bar data={barChartData} options={barChartOptions} height={500} />
-          </div>
-          <div className={styles.modelColumn}>
-              <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
-          </div>
-          <div className={styles.column}>
-            <h2>Perceived Balance Analysis</h2>
-              <GaugeChart value={balanceData?.totalAverage} maxValue={10} text={'Perceived Balance Analysis'} />
-          </div>
-        </div>
-        <div className={styles.container}>
-          <div className={styles.column}>
-            <h2>Perceived Exertion Rate</h2>
-             <GaugeChart value={exertionData?.totalAverage} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
-          </div>
-          <div className={styles.column}>
+            <div  className={styles.column}>
+              <h2>Perceived Balance Rate</h2>
+                <GaugeChart value={Math.round(balanceData?.totalAverage)} maxValue={10} text={'Perceived Balance Analysis'} />
+            </div>
+            <div  className={styles.column}>
             <h2>Situational Awareness</h2> 
             <Pie data={pieChartData} />
           </div>
+            <div className={styles.column}>
+              <h2>Perceived Exertion Rate</h2>
+              <GaugeChart value={Math.round(exertionData?.totalAverage)} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
+          </div>
+          </div>
+            <div className={styles.modelColumn}>
+              <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
+          </div>
+          <div className={styles.column}>
             <div  className={styles.column}>
+               <h2>Perceived Discomfort Rate</h2>
+            <Bar data={barChartData} options={barChartOptions} height={500} />
+           
+            </div>
+               <div  className={styles.column}>
             <h2>Overall Analysis</h2>
               <GaugeChart value={weightedSumRating} maxValue={100} text={'Overall Analysis'} />
           </div>
-          <div className={styles.cognitiveCol}>
+            <div>
               <h2>Cognitive Workload Overview</h2>
               <BulletGraph value={Math.round(cognitiveWorkload?.average_mental_demand)} title={'Mental Demand'}/>
               <BulletGraph value={Math.round(cognitiveWorkload?.average_physical_demand)} title={'Physical Demand'}/>
@@ -278,12 +277,14 @@ export default function Home() {
               <BulletGraph value={Math.round(cognitiveWorkload?.average_effort)} title={'Effort'}/>
               <BulletGraph value={Math.round(cognitiveWorkload?.average_frustration)} title={'Frustration'}/>
           </div>
+       
+          </div>
         </div>
       </main>
 
       <style jsx>{`
         main {
-          padding: 5rem 0;
+          padding: 0;
           flex: 1;
           display: flex;
           flex-direction: column;

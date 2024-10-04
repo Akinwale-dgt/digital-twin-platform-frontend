@@ -18,17 +18,11 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Button onClick={goHome} color="inherit">Home</Button>
         </Toolbar>
+         <h1 style={{textAlign: 'center', marginTop: '-55px'}}>
+          Twin Digital Platform
+        </h1>
       </AppBar>
     </Box>
   );
