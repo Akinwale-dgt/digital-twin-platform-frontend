@@ -97,7 +97,7 @@ function Model(props) {
 
 const ModelViewer = (props) => {
   return (
-    <Canvas camera={{ position: [-40.5, 0, 15.25], fov: 9 }} style={{ height: '1200px', width: '100%', marginTop: '-200px' }}>
+    <Canvas camera={{ position: [-55.5, 0, 15.25], fov: 9 }} style={{ height: '1200px', width: '100%', marginTop: '-200px' }}>
       <ambientLight intensity={1.25} />
       <ambientLight intensity={0.1} />
       <directionalLight intensity={0.4} />

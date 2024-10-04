@@ -13,6 +13,7 @@ import GaugeChart from '../components/GuageChart/GuageChart.jsx'
 import axios from 'axios';
 import { Bar, Pie } from "react-chartjs-2";
 import BulletGraph from '../components/BulletGraph/BulletGraph';
+import { Gauge } from '@mui/x-charts/Gauge';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
 // Register necessary chart components
@@ -101,9 +102,20 @@ export default function Home() {
    const balanceData = data?.data?.balance
    const exertionData = data?.data?.exertion
    const cognitiveWorkload =data?.data?.cognitiveWorkload
-     const weightedSumRating = data?.data?.weightedSumRating
+   const weightedSumRating = data?.data?.weightedSumRating
+   const roundSumRating = Math.round(weightedSumRating);
 
     // Data for the pie chart
+    const options = {
+    plugins: {
+      legend: {
+        display: false, // Hides the legend
+      },
+      tooltip: {
+        enabled: true, // Optional: disables tooltips if you want to remove hover labels
+      },
+    },
+  };
 
    const pieChartData = {
     labels: [
@@ -120,14 +132,14 @@ export default function Home() {
       {
         label: "Situational Awareness Rate",
         data: [
-          situationalData?.average_arousal,
-          situationalData?.average_complexity_of_situation,
-          situationalData?.average_concentration_of_attention,
-          situationalData?.average_familiarity_with_situation,
-          situationalData?.average_information_quantity,
-          situationalData?.average_instability_of_situation,
-          situationalData?.average_spare_mental_capacity,
-          situationalData?.average_variability_of_situation,
+          situationalData?.average_arousal || 0,
+          situationalData?.average_complexity_of_situation || 0,
+          situationalData?.average_concentration_of_attention || 1,
+          situationalData?.average_familiarity_with_situation || 1,
+          situationalData?.average_information_quantity || 1,
+          situationalData?.average_instability_of_situation|| 1,
+          situationalData?.average_spare_mental_capacity|| 1,
+          situationalData?.average_variability_of_situation || 1,
         ],
         backgroundColor: [
           "#FF6384",
@@ -228,56 +240,53 @@ export default function Home() {
 
       <main className={styles.main} style={{marginBottom: '20px'}}>
         <div className={styles.buttonSection}>
-          <div>
-
+        </div>
+        <div className={styles.container}>
+          <div className={styles.column}>
+           <div>
           <Button  onClick={handleClickOpen}>
             Data Input
           </Button>
           </div>
-          <div>
+            <div  className={styles.column}>
+              <h2>Perceived Balance Rate</h2>
+                <BulletGraph max={10} value={Math.round(balanceData?.totalAverage)} title={'Exertion Rate'}/>
+              <h2>Situational Awareness</h2> 
+            <Pie data={pieChartData} options={options}/>
+            <div>
+              <h2>Perceived Exertion Rate</h2>
+              <GaugeChart value={Math.round(exertionData?.totalAverage)} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
+          </div>
+            </div>
+          </div>
+            <div className={styles.modelColumn}>
+              <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
+                <div style={{marginTop: '-500px', textAlign: 'center'}}>
+                <h2  style={{marginBottom: '-6px'}}>Overall Analysis</h2>
+                <Gauge width={550} height={200} value={`${Math.round(weightedSumRating) || 0}`} valueMin={0} valueMax={100} />
+                </div>
+          </div>
+          <div className={styles.column}>
+            <div>
           <Button onClick={handleClickOpenDialog}>
             Analyse Risk
           </Button>
             </div>
-        </div>
-        <div className={styles.container}>
-          <div className={styles.column}>
-            <div  className={styles.column}>
-              <h2>Perceived Balance Rate</h2>
-                <GaugeChart value={Math.round(balanceData?.totalAverage)} maxValue={10} text={'Perceived Balance Analysis'} />
-            </div>
-            <div  className={styles.column}>
-            <h2>Situational Awareness</h2> 
-            <Pie data={pieChartData} />
-          </div>
-            <div className={styles.column}>
-              <h2>Perceived Exertion Rate</h2>
-              <GaugeChart value={Math.round(exertionData?.totalAverage)} maxValue={20} text={'Perceived Exertion Rate Analysis'} />
-          </div>
-          </div>
-            <div className={styles.modelColumn}>
-              <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
-          </div>
-          <div className={styles.column}>
             <div  className={styles.column}>
                <h2>Perceived Discomfort Rate</h2>
             <Bar data={barChartData} options={barChartOptions} height={500} />
-           
-            </div>
-               <div  className={styles.column}>
-            <h2>Overall Analysis</h2>
-              <GaugeChart value={weightedSumRating} maxValue={100} text={'Overall Analysis'} />
-          </div>
             <div>
               <h2>Cognitive Workload Overview</h2>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_mental_demand)} title={'Mental Demand'}/>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_physical_demand)} title={'Physical Demand'}/>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_temporal_demand)} title={'Temporal Demand'}/>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_performance)} title={'Performance'}/>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_effort)} title={'Effort'}/>
-              <BulletGraph value={Math.round(cognitiveWorkload?.average_frustration)} title={'Frustration'}/>
+              <div>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_mental_demand)} title={'Mental Demand'}/>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_physical_demand)} title={'Physical Demand'}/>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_temporal_demand)} title={'Temporal Demand'}/>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_performance)} title={'Performance'}/>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_effort)} title={'Effort'}/>
+              <BulletGraph max={10} value={Math.round(cognitiveWorkload?.average_frustration)} title={'Frustration'}/>
+              </div>
           </div>
-       
+            </div>
           </div>
         </div>
       </main>

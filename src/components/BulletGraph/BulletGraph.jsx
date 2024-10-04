@@ -15,14 +15,14 @@ const HighchartsReact = dynamic(() => import('highcharts-react-official'), { ssr
 
 const BulletGraph = (props) => {
 
-const {title, value } = props;
+const {title, value, max } = props;
 
   const options = {
     chart: {
       type: 'bullet',
       inverted: true,
-      height: '15%',
-       width: 400
+      height: '17%',
+       width: 365
     },
     title: {
       text: 'Cognitive Workload Overview',
@@ -35,11 +35,11 @@ const {title, value } = props;
     },
     yAxis: {
       min: 1,
-      max: 10,
+      max: max,
       plotBands: [
               {
                 from: 0,
-                to: 10,
+                to: max,
                 color: {
                   linearGradient: {
                     x1: 0,
