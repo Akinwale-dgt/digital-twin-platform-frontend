@@ -262,8 +262,8 @@ export default function Home() {
             <div className={styles.modelColumn}>
               <ModelViewer lowerBack={true} lowerBackHighlightLevel={discomfortData?.average_lower_back} cognitive={true} cognitiveLevel={cognitiveWorkload?.totalAverage} />
                 <div style={{marginTop: '-500px', textAlign: 'center'}}>
-                <h2  style={{marginBottom: '-6px'}}>Overall Analysis</h2>
-                <Gauge width={550} height={200} value={`${Math.round(weightedSumRating) || 0}`} valueMin={0} valueMax={100} />
+                <h2>Overall Analysis</h2>
+                <Gauge width={550} height={250} value={`${Math.round(weightedSumRating) || 0}`} valueMin={0} valueMax={100} />
                 </div>
           </div>
           <div className={styles.column}>
