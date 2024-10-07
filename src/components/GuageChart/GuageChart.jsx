@@ -18,7 +18,7 @@ const GaugeChart = (props) => {
   const options = {
     chart: {
       type: 'solidgauge',
-      height: '70%',
+      height: '50%',
     },
     title: {
       text: text,
@@ -53,9 +53,6 @@ const GaugeChart = (props) => {
       tickWidth: 0,
       minorTickInterval: null,
       tickAmount: 2,
-      // title: {
-      //   text: text,
-      // },
       labels: {
         y: 16,
       },
@@ -71,7 +68,6 @@ const GaugeChart = (props) => {
     },
     series: [
       {
-        // name: text,
         data: [value],
         dataLabels: {
           format: '<div style="text-align:center"><span style="font-size:25px">{y}</span><br/>' +

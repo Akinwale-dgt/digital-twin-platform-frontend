@@ -21,7 +21,7 @@ const {title, value, max } = props;
     chart: {
       type: 'bullet',
       inverted: true,
-      height: '17%',
+      height: '18%',
        width: 365
     },
     title: {
@@ -48,11 +48,11 @@ const {title, value, max } = props;
                     y2: 0, // Horizontal gradient
                   },
                   stops: [
-                    [0, '#f44336'], // Red
-                    [0.25, '#ff9800'], // Orange
+                    [0, '#4caf50' ], // Deep Green
+                    [0.25,  '#8bc34a'], //  Light Green 
                     [0.5, '#ffeb3b'], // Yellow
-                    [0.75, '#8bc34a'], // Light Green
-                    [1, '#4caf50'], // Dark Green
+                    [0.75, '#ff9800'], // Orange
+                    [1, '#f44336'], // Red
                   ],
                 },
               },

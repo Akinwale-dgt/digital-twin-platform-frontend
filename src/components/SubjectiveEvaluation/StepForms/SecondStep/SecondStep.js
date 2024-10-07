@@ -58,6 +58,47 @@ export default function SecondStepForm(props) {
                 <Field type="radio" name="mentalDemand" value="10" />
                 10
               </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="11" />
+                11
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="12" />
+                12
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="13" />
+                13
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="14" />
+                14
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="15" />
+                15
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="16" />
+                16
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="17" />
+                17
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="18" />
+                18
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="19" />
+                19
+              </label>
+                <label>
+                <Field type="radio" name="mentalDemand" value="20" />
+                20
+              </label>
+
               <span className={styles.spanStyle}>Very High</span>
             </Box>
                <Box className={styles.errorSectionContainer}>
@@ -111,6 +152,46 @@ export default function SecondStepForm(props) {
               <label>
                 <Field type="radio" name="physicalDemand" value="10" />
                 10
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="11" />
+                11
+              </label>
+                <label>
+                <Field type="radio" name="physicalDemand" value="12" />
+                12
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="13" />
+                13
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="14" />
+                14
+              </label>
+                <label>
+                <Field type="radio" name="physicalDemand" value="15" />
+                15
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="16" />
+                16
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="17" />
+                17
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="18" />
+                18
+              </label>
+              <label>
+                <Field type="radio" name="physicalDemand" value="19" />
+                19
+              </label>
+               <label>
+                <Field type="radio" name="physicalDemand" value="20" />
+                20
               </label>
               <span className={styles.spanStyle}>Very High</span>
             </Box>
@@ -166,6 +247,46 @@ export default function SecondStepForm(props) {
                 <Field type="radio" name="temporalDemand" value="10" />
                 10
               </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="11" />
+                11
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="12" />
+                12
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="13" />
+                13
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="14" />
+                14
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="15" />
+                15
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="16" />
+                16
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="17" />
+                17
+              </label>
+                   <label>
+                <Field type="radio" name="temporalDemand" value="18" />
+                18
+              </label>
+              <label>
+                <Field type="radio" name="temporalDemand" value="19" />
+                19
+              </label>
+                <label>
+                <Field type="radio" name="temporalDemand" value="20" />
+                20
+              </label>
               <span className={styles.spanStyle}>Very High</span>
             </Box>
             <Box className={styles.errorSectionContainer}>
@@ -219,6 +340,46 @@ export default function SecondStepForm(props) {
               <label>
                 <Field type="radio" name="performance" value="10" />
                 10
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="11" />
+                11
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="12" />
+                12
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="13" />
+                13
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="14" />
+                14
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="15" />
+                15
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="16" />
+                16
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="17" />
+                17
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="18" />
+                18
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="19" />
+                19
+              </label>
+               <label>
+                <Field type="radio" name="performance" value="20" />
+                20
               </label>
             <span className={styles.spanStyle}>Failure</span>
               </Box>
@@ -274,6 +435,46 @@ export default function SecondStepForm(props) {
                 <Field type="radio" name="effort" value="10" />
                 10
               </label>
+              <label>
+                <Field type="radio" name="effort" value="11" />
+                11
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="12" />
+                12
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="13" />
+                13
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="14" />
+                14
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="15" />
+                15
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="16" />
+                16
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="17" />
+                17
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="18" />
+                18
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="19" />
+                19
+              </label>
+              <label>
+                <Field type="radio" name="effort" value="20" />
+                20
+              </label>
              <span className={styles.spanStyle}>Very High</span>
               </Box>
 
@@ -328,6 +529,46 @@ export default function SecondStepForm(props) {
               <label>
                 <Field type="radio" name="frustration" value="10" />
                 10
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="11" />
+                11
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="12" />
+                12
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="13" />
+                13
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="14" />
+                14
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="15" />
+                15
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="16" />
+                16
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="17" />
+                17
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="18" />
+                18
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="19" />
+                19
+              </label>
+              <label>
+                <Field type="radio" name="frustration" value="20" />
+                20
               </label>
               <span className={styles.spanStyle}>Very High</span>
               </Box>

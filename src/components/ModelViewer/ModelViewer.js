@@ -16,14 +16,22 @@ function Model(props) {
     return 'green';
   };
 
+
+  const getCongnitiveColorByNumber = (num) => {
+    if (num >= 70) return 'red';
+    if (num >= 31) return 'yellow';
+    return 'green';
+  };
+
+
   const lowerBackHighlightColor = getColorByNumber(lowerBackHighlightLevel);
-  const cognitiveLevelColor = getColorByNumber(cognitiveLevel);
+  const cognitiveLevelColor = getCongnitiveColorByNumber(cognitiveLevel);
   
   const gltf = useLoader(GLTFLoader, '/images/Char_Base.blend2.glb');
   const headNode = gltf.scene.getObjectByName('Brain');
   const legOneNode = gltf.scene.getObjectByName('leg1');
   const legTwoNode = gltf.scene.getObjectByName('leg2');
-  const handOneNode = gltf.scene.getObjectByName('hand1');
+  const handOneNode = gltf.scene.getObjectById('Cube');
   const handTwoNode = gltf.scene.getObjectByName('hand2');
   const heartNode = gltf.scene.getObjectByName('heart');
   const backNode = gltf.scene.getObjectByName('back');
@@ -34,13 +42,13 @@ function Model(props) {
   return (
     <>
       <primitive object={gltf.scene} ref={modelRef} scale={[2, 1.6, 2]}>;
-      {
+      {/* {
         lowerBack && lowerBackHighlightLevel &&
-        <mesh position={backNode?.position}>
+        <mesh position={legOneNode?.position}>
             <sphereGeometry args={[0.1, 32, 32]} />
             <meshStandardMaterial color={lowerBackHighlightColor} />
         </mesh>
-      }
+      } */}
       {
         cognitive && cognitiveLevel &&
         <mesh position={headNode?.position}>

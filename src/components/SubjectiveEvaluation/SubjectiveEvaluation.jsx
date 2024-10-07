@@ -71,7 +71,7 @@ export default function SubjectiveEvaluationComponent() {
     information_quantity: Number(values.informationQuantity)
   })
   .then((response) => {
-    toast.success(response.data.message, {
+    toast.success('Data submitted successfully', {
       position: "top-right"
     });
     setTimeout(() => {
