@@ -14,11 +14,11 @@ import SpeedGuageChart from '../components/SpeedGaugeChart/SpeedGuageChart.jsx'
 import axios from 'axios';
 import { Bar, Pie } from "react-chartjs-2";
 import BulletGraph from '../components/BulletGraph/BulletGraph';
-import { Gauge } from '@mui/x-charts/Gauge';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import Highcharts from 'highcharts';
 import dynamic from 'next/dynamic';
-import HighchartsSolidGauge from 'highcharts/modules/solid-gauge'; // Import for solid gauge
+// import HighchartsSolidGauge from 'highcharts/modules/solid-gauge'; // Import for solid gauge
 
 // Register necessary chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -28,6 +28,32 @@ export default function Home() {
   const router = useRouter();
 
    const barChartOptions = {
+    responsive: true,
+    scales: {
+    x: {
+      ticks: {
+        callback: function (value) {
+          const label = this.getLabelForValue(value);
+          // Truncate label if it's too long
+          return label.length > 10 ? label.substring(0, 10) + '...' : label;
+        },
+        font: {
+          size: 10 // Reduce font size for X-axis labels
+        }
+      }
+    },
+    y: {
+      ticks: {
+        font: {
+          size: 10 // Reduce font size for Y-axis labels
+        }
+      },
+      title: {
+        display: true,
+        text: 'Rates'
+      }
+    }
+  },
     maintainAspectRatio: false,  // This allows control over height
   };
 
@@ -51,8 +77,10 @@ export default function Home() {
 
 
   const [data, setData] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
 
   const getAnalysisResult = () => {
+    setLoading(true);
   axios.get('https://digital-twin-platform.onrender.com/api/analyze-subjective-data')
     .then((response) => {
       setData(response.data);
@@ -64,11 +92,10 @@ export default function Home() {
       });
     })
     .finally(() => {
+      setLoading(false);
       handleCloseDialog();
     });
 };
-
-  console.log(data);
 
 
   const discomfortData =data?.data?.discomfort
@@ -244,37 +271,55 @@ export default function Home() {
       "Instability of situation",
       "Spare mental capacity",
       "Variability of situation"
-    ]
+    ],
+    labels: {
+        formatter: function () {
+          return this.value.length > 10 ? this.value.substring(0, 5) + '...' : this.value; // Truncate labels longer than 5 characters
+        },
+        style: {
+          fontSize: '10px' // Reduce font size
+        }
+      }
   },
   yAxis: {
     title: {
       text: 'Rates'
-    }
+    },
+      labels: {
+        style: {
+          fontSize: '10px' // Reduce Y axis label font size
+        }
+      }
   },
   series: [
     {
       name: 'Situational Awareness',
       color: '#FF916C',
       data: [
-          situationalData?.average_arousal || 1,
-          situationalData?.average_complexity_of_situation || 1,
-          situationalData?.average_concentration_of_attention || 1,
-          situationalData?.average_familiarity_with_situation|| 1,
-          situationalData?.average_information_quantity || 1,
-          situationalData?.average_instability_of_situation || 1,
-          situationalData?.average_spare_mental_capacity || 1,
-          situationalData?.average_variability_of_situation || 1,
+          Math.round(situationalData?.average_arousal) || 1,
+          Math.round(situationalData?.average_complexity_of_situation) || 1,
+          Math.round(situationalData?.average_concentration_of_attention) || 1,
+          Math.round(situationalData?.average_familiarity_with_situation)|| 1,
+          Math.round(situationalData?.average_information_quantity) || 1,
+          Math.round(situationalData?.average_instability_of_situation) || 1,
+          Math.round(situationalData?.average_spare_mental_capacity) || 1,
+          Math.round(situationalData?.average_variability_of_situation) || 1,
       ]
     }
   ],
   plotOptions: {
-    line: {
-      dataLabels: {
-        enabled: true
-      },
-      enableMouseTracking: true
+      line: {
+        dataLabels: {
+          enabled: true,
+          style: {
+            fontSize: '8px' // Reduce data label font size
+          },
+          formatter: function () {
+            return this.y; // Display the y value directly
+          }
+        }
+      }
     }
-  }
 };
 
 
@@ -319,7 +364,7 @@ export default function Home() {
         </DialogTitle>
         <DialogContent className={styles.dialogContent}>
           <Button autoFocus  onClick={getAnalysisResult}>
-            Subjective 
+            Subjective   {loading &&  <CircularProgress color="secondary" size="20px"/>} 
           </Button>
           <Button  onClick={visitOjectiveAnalysis} autoFocus>
             Objective 
@@ -328,7 +373,7 @@ export default function Home() {
       </Dialog>
     <div className={styles.container}>
       <Head>
-        <title>Twin Digital Platform</title>
+        <title>Digital Twin Platform</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

@@ -53,12 +53,13 @@ function renderStepContent(
 export default function SubjectiveEvaluationComponent() {
   const [activeStep, setActiveStep] = useState(0);
   const router = useRouter()
-
+  const [loading, setLoading] = useState(false);
   const currentValidationSchema = validationSchema[activeStep];
   const steps = getSteps();
   const isLastStep = activeStep === steps.length - 1;
 
   const submitForm = (values) => {
+    setLoading(true)
     axios.post('https://digital-twin-platform.onrender.com/api/situational-awareness', {
     instability_of_situation: Number(values.instabilityOfSituation),
     complexity_of_situation: Number(values.complexityOfSituation) ,
@@ -82,6 +83,8 @@ export default function SubjectiveEvaluationComponent() {
       toast(error.message, {
         position: "top-right"
     });
+    }).finally(()=>{
+      setLoading(false)
     });
   };
 
@@ -178,17 +181,17 @@ const sendBalanceData = (values) => {
   return (
     <React.Fragment>
       <ToastContainer />
-        <Stepper activeStep={activeStep} alternativeLabel>
-    {steps.map((label) => (
-      <Step key={label}>
-        <StepLabel sx={{
-          marginTop: '16px',
-      fontSize: '18px',
-      fontWeight: '700',
-        }}>{label}</StepLabel>
-      </Step>
-    ))}
-  </Stepper>
+      <Stepper activeStep={activeStep} alternativeLabel>
+      {steps.map((label) => (
+        <Step key={label}>
+          <StepLabel sx={{
+            marginTop: '16px',
+        fontSize: '18px',
+        fontWeight: '700',
+          }}>{label}</StepLabel>
+        </Step>
+      ))}
+    </Stepper>
   {activeStep === steps.length ? (
          'Go back'
         ) : (
@@ -237,7 +240,7 @@ const sendBalanceData = (values) => {
                   )}
                   <Button type="submit">
                     {isLastStep ? 'Submit Data' : 'Next'}
-                    {isSubmitting && <CircularProgress color="secondary" size={18} />}
+                    {loading && <CircularProgress color="secondary" size={18} />}
                   </Button>
                 </div>
               </Form>

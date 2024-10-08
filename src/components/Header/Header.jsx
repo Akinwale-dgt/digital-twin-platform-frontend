@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import styles from './Header.module.css';
 import Button from '@mui/material/Button';
-import InputBase from '@mui/material/InputBase';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
@@ -21,50 +19,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
 
 export default function Header() {
   const router = useRouter()
@@ -100,7 +59,10 @@ export default function Header() {
     handleMobileMenuClose();
   };
 
+  const [loading, setLoading] = React.useState(false);
+
   const resetDB = () => {
+    setLoading(true)
     axios.delete('https://digital-twin-platform.onrender.com/api/reset')
     .then((response) => {
       toast.success(response, {
@@ -113,7 +75,9 @@ export default function Header() {
         toast(error.message, {
           position: "top-right"
       });
-    });
+    }).finally(()=>{
+       setLoading(false)
+    })
   };
 
   const menuId = 'primary-search-account-menu';
@@ -189,7 +153,7 @@ export default function Header() {
         </DialogContent>
         <DialogActions className={styles.dialogContent}>
           <Button onClick={handleClose}>No</Button>
-          <Button onClick={resetDB}>Yes</Button>
+          <Button onClick={resetDB}>Yes {loading &&  <CircularProgress color="secondary" size="20px"/>}</Button>
         </DialogActions>
       </Dialog>
       <Box sx={{ flexGrow: 1 }}>
@@ -197,7 +161,7 @@ export default function Header() {
           <Toolbar>
             <Button onClick={goHome} color="inherit" style={{marginRight: '650px'}}>Home</Button>
             <h1 style={{textAlign: 'center', display: 'contents'}}>
-              Twin Digital Platform
+               Digital Twin Platform
             </h1>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

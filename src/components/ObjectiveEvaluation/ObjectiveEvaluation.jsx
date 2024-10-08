@@ -47,8 +47,10 @@ export default function ObjectiveEvaluationComponent() {
   const currentValidationSchema = validationSchema[activeStep];
   const steps = getSteps();
   const isLastStep = activeStep === steps.length - 1;
+  const [loading, setLoading] = useState(false);
 
   const submitForm = (values) => {
+    setLoading(true);
     const exertionRequestBody = new FormData();
     exertionRequestBody.append('input-data', values.exertion[0])
     exertionRequestBody.append('measure', 'exertion')
@@ -66,6 +68,8 @@ export default function ObjectiveEvaluationComponent() {
         toast(error.message, {
           position: "top-right"
       });
+    }).finally(()=>{
+      setLoading(false);
     });
   };
 
@@ -162,7 +166,7 @@ const sendFallRiskData = (values) => {
                   )}
                   <Button type="submit">
                     {isLastStep ? 'Submit Data' : 'Next'}
-                    {isSubmitting && <CircularProgress color="secondary" size={18} />}
+                    {loading && <CircularProgress color="secondary" size={18} />}
                   </Button>
                 </div>
               </Form>
