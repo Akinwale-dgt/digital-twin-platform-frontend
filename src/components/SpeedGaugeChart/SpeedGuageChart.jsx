@@ -4,8 +4,6 @@ import HighchartsReact from 'highcharts-react-official';
 export default function SpeedGuageChart(props) {
   const {value, valueMax} = props
 
-  console.log(typeof value);
-
   const chartOptions = {
     chart: {
       type: 'gauge', // Set the chart type to 'gauge'

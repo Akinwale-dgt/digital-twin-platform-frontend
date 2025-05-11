@@ -27,85 +27,78 @@ function Model(props) {
   const lowerBackHighlightColor = getColorByNumber(lowerBackHighlightLevel);
   const cognitiveLevelColor = getCongnitiveColorByNumber(cognitiveLevel);
   
-  const gltf = useLoader(GLTFLoader, '/images/Char_Base.blend2.glb');
-  const headNode = gltf.scene.getObjectByName('Brain');
+  const gltf = useLoader(GLTFLoader, '/images/DT.glb');
+  const brainNode = gltf.scene.getObjectByName('Brain');
   const legOneNode = gltf.scene.getObjectByName('leg1');
   const legTwoNode = gltf.scene.getObjectByName('leg2');
-  const handOneNode = gltf.scene.getObjectById('Cube');
+  const handOneNode = gltf.scene.getObjectByName('hand1');
   const handTwoNode = gltf.scene.getObjectByName('hand2');
   const heartNode = gltf.scene.getObjectByName('heart');
-  const backNode = gltf.scene.getObjectByName('back');
-  const wristOneNode = gltf.scene.getObjectByName('wrist1');
-  const wristTwoNode = gltf.scene.getObjectByName('wrist2');
-
+  const headNode = gltf.scene.getObjectByName('head');
+  const bodyNode = gltf.scene.getObjectByName('body');
+  const charLpNode = gltf.scene.getObjectByName('Char_lp');
 
   return (
     <>
-      <primitive object={gltf.scene} ref={modelRef} scale={[2, 1.6, 2]}>;
-      {/* {
+      <primitive object={gltf.scene} ref={modelRef} scale={[2, 1.6, 2]}>
+        ;
+        {cognitive && cognitiveLevel && (
+          <mesh position={handTwoNode?.position}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color={cognitiveLevelColor} />
+          </mesh>
+        )}
+        {/* {
         lowerBack && lowerBackHighlightLevel &&
         <mesh position={legOneNode?.position}>
             <sphereGeometry args={[0.1, 32, 32]} />
             <meshStandardMaterial color={lowerBackHighlightColor} />
         </mesh>
       } */}
-      {
-        cognitive && cognitiveLevel &&
-        <mesh position={headNode?.position}>
+        {handAndWrist && (
+          <mesh position={[-1.7, 1, 1]}>
             <sphereGeometry args={[0.1, 32, 32]} />
-            <meshStandardMaterial color={cognitiveLevelColor} />
-        </mesh>
-      }
-      {
-        handAndWrist && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
-      {
-        upperArm && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
-       {
-        shoulder && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
-       {
-        thigh && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
-       {
-        neck && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
-       {
-        lowerLeg && 
-        <mesh position={[-1.7, 1, 1]}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
-      }
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
+        {upperArm && (
+          <mesh position={[-1.7, 1, 1]}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
+        {shoulder && (
+          <mesh position={[-1.7, 1, 1]}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
+        {thigh && (
+          <mesh position={[-1.7, 1, 1]}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
+        {neck && (
+          <mesh position={[-1.7, 1, 1]}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
+        {lowerLeg && (
+          <mesh position={[-1.7, 1, 1]}>
+            <sphereGeometry args={[0.1, 32, 32]} />
+            <meshStandardMaterial color='red' />
+          </mesh>
+        )}
       </primitive>
     </>
-  )
+  );
 }
 
 const ModelViewer = (props) => {
   return (
-    <Canvas camera={{ position: [-55.5, 0, 15.25], fov: 9 }} style={{ height: '1200px', width: '100%', marginTop: '-200px' }}>
+    <Canvas camera={{ position: [-55.5, 0, 10.25], fov: 9 }} style={{ height: '1300px', width: '100%', marginTop: '0px' }}>
       <ambientLight intensity={1.25} />
       <ambientLight intensity={0.1} />
       <directionalLight intensity={0.4} />

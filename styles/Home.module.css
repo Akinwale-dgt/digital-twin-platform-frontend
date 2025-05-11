@@ -94,10 +94,11 @@
 
 .column {
   flex: 1; 
-  min-width: 398px;
+  min-width: 600px;
   margin: 5px;
   padding: 20px;
   text-align: center;
+  height: 100%;
 }
 
 .buttonSection {
@@ -134,7 +135,7 @@
   justify-content: space-evenly;
   align-items: center;
   flex-wrap: wrap;
-  /* padding: 30px; */
+  padding: 20px;
 }
 
 .column {
@@ -143,21 +144,20 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin: 10px;
-  flex-basis: 20%;
-  max-width: 25.5%;
+  flex-basis: 30%;
+  max-width: 50%;
   text-align: center;
-  min-height: 800px;
+  min-height: 1400px;;
 }
 
-.modelColumn {
-  height: 80vh;
+/* .modelColumn {
+  height: 60vh;
   flex-basis: 30%;
   width: 90vw;
-}
+} */
 
 .column canvas {
-  width: 100%;
-  max-height: 300px;
+  max-height: 1400px;
 }
 
 .column h2 {
