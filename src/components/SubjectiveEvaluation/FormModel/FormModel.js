@@ -39,34 +39,35 @@ export default {
     discomfortLevel: {
       name: 'discomfortLevel',
       label: 'Discomfort Level',
-      requiredErrorMsg: 'This field is required because you have more than "3" rating in one of the fields above',
+      requiredErrorMsg:
+        'This field is required because you have more than "3" rating in one of the fields above',
     },
-      mentalDemand: {
+    mentalDemand: {
       name: 'mentalDemand',
       label: 'Mental Demand',
       requiredErrorMsg: 'Mental demand rating is required',
     },
-      physicalDemand: {
+    physicalDemand: {
       name: 'physicalDemand',
       label: 'Physical Demand',
       requiredErrorMsg: 'Physical demand rating is required',
     },
-      performance: {
+    performance: {
       name: 'performance',
       label: 'Performance',
       requiredErrorMsg: 'Performance rating is required',
     },
-       effort: {
+    effort: {
       name: 'effort',
       label: 'Effort',
       requiredErrorMsg: 'Effort rating is required',
     },
-       frustration: {
+    frustration: {
       name: 'frustration',
       label: 'Frustration',
       requiredErrorMsg: 'Frustration rating is required',
     },
-      temporalDemand: {
+    temporalDemand: {
       name: 'temporalDemand',
       label: 'Temporal Demand',
       requiredErrorMsg: 'Temporal demand rating is required',
@@ -80,7 +81,7 @@ export default {
       name: 'balance',
       label: 'Balance',
       requiredErrorMsg: 'Balance rating is required',
-    }, 
+    },
     instabilityOfSituation: {
       name: 'instabilityOfSituation',
       label: 'Instability Of Situation',
@@ -125,6 +126,86 @@ export default {
       name: 'familiarityWithSituation',
       label: 'Familiarity with Situation',
       requiredErrorMsg: 'Familiarity with Situation rating is required',
-    }
+    },
+    donAndDoff: {
+      name: 'donAndDoff',
+      label: 'Don And Doff',
+      requiredErrorMsg: 'Rating is required',
+    },
+    adjustFitting: {
+      name: 'adjustFitting',
+      label: 'Adjust Fitting',
+      requiredErrorMsg: 'Rating is required',
+    },
+    worksAsExpected: {
+      name: 'worksAsExpected',
+      label: 'Works As Expected',
+      requiredErrorMsg: 'Rating is required',
+    },
+    meetsNeed: {
+      name: 'meetsNeed',
+      label: 'Meets Need',
+      requiredErrorMsg: 'Rating is required',
+    },
+    accomplishTask: {
+      name: 'accomplishTask',
+      label: 'Accomplish Task',
+      requiredErrorMsg: 'Rating is required',
+    },
+    withoutAssistance: {
+      name: 'withoutAssistance',
+      label: 'Without Assistance',
+      requiredErrorMsg: 'Rating is required',
+    },
+    workWith: {
+      name: 'workWith',
+      label: 'Work With',
+      requiredErrorMsg: 'Rating is required',
+    },
+    needToLearn: {
+      name: 'needToLearn',
+      label: 'Need To Learn',
+      requiredErrorMsg: 'Rating is required',
+    },
+    easilyLearnToAssemble: {
+      name: 'easilyLearnToAssemble',
+      label: 'Easily Learn ToA ssemble',
+      requiredErrorMsg: 'Rating is required',
+    },
+    easilyLearnToAdjust: {
+      name: 'easilyLearnToAdjust',
+      label: 'Easily Learn To Adjust',
+      requiredErrorMsg: 'Rating is required',
+    },
+    easilyLearnChecks: {
+      name: 'easilyLearnChecks',
+      label: 'Easily Learn Checks',
+      requiredErrorMsg: 'Rating is required',
+    },
+    rememberHowToUse: {
+      name: 'rememberHowToUse',
+      label: 'Remember How To Use',
+      requiredErrorMsg: 'Rating is required',
+    },
+    useAgainWithoutAssistance: {
+      name: 'useAgainWithoutAssistance',
+      label: 'Use Again Without Assistance',
+      requiredErrorMsg: 'Rating is required',
+    },
+    restrictsMovement: {
+      name: 'restrictsMovement',
+      label: 'Restricts Movement',
+      requiredErrorMsg: 'Rating is required',
+    },
+    interfereWithEnvironment: {
+      name: 'interfereWithEnvironment',
+      label: 'Interfere With Environment',
+      requiredErrorMsg: 'Rating is required',
+    },
+    satisfaction: {
+      name: 'satisfaction',
+      label: 'Satisfaction',
+      requiredErrorMsg: 'Rating is required',
+    },
   },
 };
