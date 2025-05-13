@@ -576,7 +576,7 @@ export default function SixthStepForm(props) {
               marginTop: '20px',
             }}
           >
-            Ease of use
+            Comfort
           </Typography>
           <Box>
             <fieldset className={styles.fieldsetStyle}>
