@@ -63,20 +63,30 @@ export default function SubjectiveEvaluationComponent() {
   const submitForm = (values) => {
     setLoading(true);
     axios
-      .post(
-        'https://digital-twin-platform.onrender.com/api/situational-awareness',
-        {
-          instability_of_situation: Number(values.instabilityOfSituation),
-          complexity_of_situation: Number(values.complexityOfSituation),
-          variability_of_situation: Number(values.variabilityOfSituation),
-          arousal: Number(values.arousal),
-          concentration_of_attention: Number(values.concentrationOfAttention),
-          division_of_attention: Number(values.divisionOfAttention),
-          spare_mental_capacity: Number(values.spareMentalCapacity),
-          familiarity_with_situation: Number(values.familiarityWithSituation),
-          information_quantity: Number(values.informationQuantity),
-        }
-      )
+      .post('https://postman-rest-api-learner.glitch.me/api/usability', {
+        ease_of_use: {
+          don_and_doff: Number(values.donAndDoff),
+          adjust_fitting: Number(values.adjustFitting),
+          works_as_expected: Number(values.worksAsExpected),
+          meets_need: Number(values.meetsNeed),
+          accomplish_task: Number(values.accomplishTask),
+          without_assistance: Number(values.withoutAssistance),
+          work_with: Number(values.workWith),
+        },
+        ease_of_learning: {
+          need_to_learn: Number(values.needToLearn),
+          easily_learn_to_assemble: Number(values.easilyLearnToAssemble),
+          easily_learn_to_adjust: Number(values.easilyLearnToAdjust),
+          easily_learn_checks: Number(values.easilyLearnChecks),
+          remember_how_to_use: Number(values.rememberHowToUse),
+          use_again_without_assistance: Number(values.useAgainWithoutAssistance),
+        },
+        comfort: {
+          restricts_movement: Number(values.restrictsMovement),
+          interfere_with_environment: Number(values.interfereWithEnvironment),
+          satisfaction: Number(values.satisfaction),
+        },
+      })
       .then(
         (response) => {
           toast.success('Data submitted successfully', {
