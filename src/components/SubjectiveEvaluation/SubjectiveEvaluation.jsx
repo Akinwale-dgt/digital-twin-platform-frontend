@@ -63,7 +63,7 @@ export default function SubjectiveEvaluationComponent() {
   const submitForm = (values) => {
     setLoading(true);
     axios
-      .post('https://postman-rest-api-learner.glitch.me/api/usability', {
+      .post('https://digital-twin-platform.onrender.com/api/usability', {
         ease_of_use: {
           don_and_doff: Number(values.donAndDoff),
           adjust_fitting: Number(values.adjustFitting),
@@ -79,7 +79,9 @@ export default function SubjectiveEvaluationComponent() {
           easily_learn_to_adjust: Number(values.easilyLearnToAdjust),
           easily_learn_checks: Number(values.easilyLearnChecks),
           remember_how_to_use: Number(values.rememberHowToUse),
-          use_again_without_assistance: Number(values.useAgainWithoutAssistance),
+          use_again_without_assistance: Number(
+            values.useAgainWithoutAssistance
+          ),
         },
         comfort: {
           restricts_movement: Number(values.restrictsMovement),
