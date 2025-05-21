@@ -23,7 +23,6 @@ export default function Home() {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleClose = () => setOpen(false);
   const handleCloseDialog = () => setAnalysisOpen(false);
 
   const [data, setData] = React.useState({});
@@ -114,6 +113,43 @@ export default function Home() {
     router.push('/subjective-evaluation');
   };
 
+  const downloadReport = async () => {
+    const reportId = data?.data?.report?.reportId;
+
+    if (!reportId) {
+      toast.error('Report ID not found. Cannot download the report.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://digital-twin-platform.onrender.com/api/download-report/${reportId}`,
+        {
+          responseType: 'blob', // ensure the response is a file
+        }
+      );
+
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // You can customize the filename if needed
+      link.setAttribute('download', `report-${reportId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      toast.error('Failed to download report.');
+    }
+  };
+
   console.log('====', reportData);
 
   return (
@@ -139,9 +175,7 @@ export default function Home() {
                     <Button onClick={visitSubjectiveEvaluation}>
                       Data Input
                     </Button>
-                    <Button onClick={visitSubjectiveEvaluation}>
-                      Download Report
-                    </Button>
+                    <Button onClick={downloadReport}>Download Report</Button>
                   </div>
                 </div>
               )}
@@ -158,7 +192,18 @@ export default function Home() {
               ) : null}
 
               {html ? (
-                <div dangerouslySetInnerHTML={{ __html: html }} />
+                <div
+                  style={{
+                    maxHeight: '1200px',
+                    overflowY: 'auto',
+                    border: '1px solid #ddd',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    borderRadius: '8px',
+                    backgroundColor: '#f9f9f9',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
               ) : (
                 <p style={{ fontStyle: 'italic', marginTop: '1rem' }}>
                   Report will appear here after analysis...
