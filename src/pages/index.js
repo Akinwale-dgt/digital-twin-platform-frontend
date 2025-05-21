@@ -194,7 +194,7 @@ export default function Home() {
               {html ? (
                 <div
                   style={{
-                    maxHeight: '1200px',
+                    maxHeight: '800px',
                     overflowY: 'auto',
                     border: '1px solid #ddd',
                     padding: '1rem',
