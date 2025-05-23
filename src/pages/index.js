@@ -14,11 +14,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { marked } from 'marked';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { jsPDF } from 'jspdf';
+import { decode } from 'he';
 
 export default function Home() {
   const router = useRouter();
-
-  const [open, setOpen] = React.useState(false);
   const [openAnalysis, setAnalysisOpen] = React.useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -31,6 +31,7 @@ export default function Home() {
   const [reportData, setReportData] = React.useState({});
   const [polling, setPolling] = React.useState(false);
   const [html, setHtml] = React.useState('');
+  const hiddenRef = React.useRef(null);
 
   // ✅ Convert markdown to HTML once reportData is loaded
   React.useEffect(() => {
@@ -113,47 +114,162 @@ export default function Home() {
     router.push('/subjective-evaluation');
   };
 
-  const downloadReport = async () => {
-    const reportId = data?.data?.report?.reportId;
+  const handleDownload = () => {
+    if (!reportData?.results?.report_markdown) return;
 
-    if (!reportId) {
-      toast.error('Report ID not found. Cannot download the report.');
-      return;
-    }
+    const markdown = reportData.results.report_markdown;
 
-    try {
-      const response = await axios.get(
-        `https://digital-twin-platform.onrender.com/api/download-report/${reportId}`,
-        {
-          responseType: 'blob', // ensure the response is a file
+    // Convert markdown to HTML, strip tags, decode HTML entities
+    const rawHTML = marked.parse(markdown);
+    const plainText = decode(rawHTML.replace(/<[^>]+>/g, ''));
+
+    const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxWidth = 180;
+    let y = margin;
+
+    // Title Page
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text('Digital Twin Report', 105, 50, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(14);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 65, {
+      align: 'center',
+    });
+
+    doc.addPage();
+    y = margin;
+
+    const lines = plainText.split('\n');
+
+    lines.forEach((line) => {
+      if (/^#{1,6}\s/.test(line)) {
+        // Heading detection
+        const level = line.match(/^#{1,6}/)[0].length;
+        const text = line.replace(/^#{1,6}\s*/, '');
+        const fontSize = Math.max(20 - level * 2, 10);
+        const wrapped = doc.splitTextToSize(text, maxWidth);
+
+        // Only H1 and H2 are bold
+        if (level <= 2) {
+          doc.setFont('helvetica', 'bold');
+        } else {
+          doc.setFont('helvetica', 'normal');
         }
-      );
+        doc.setFontSize(fontSize);
 
-      const blob = new Blob([response.data], {
-        type: response.headers['content-type'],
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
+        wrapped.forEach((wLine) => {
+          if (y + 10 > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+          }
+          doc.text(wLine, margin, y);
+          y += 10;
+        });
+      } else if (/\\text{.*?}/.test(line)) {
+        // \text{} handling with basic split
+        const match = line.match(/\\text{(.*?)}/);
+        if (match) {
+          const before = line.split(match[0])[0];
+          const inner = match[1];
+          const after = line.split(match[0])[1];
 
-      // You can customize the filename if needed
-      link.setAttribute('download', `report-${reportId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
+          const wrappedBefore = doc.splitTextToSize(before, maxWidth);
+          const wrappedInner = doc.splitTextToSize(inner, maxWidth);
+          const wrappedAfter = doc.splitTextToSize(after, maxWidth);
 
-      // Clean up
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading report:', error);
-      toast.error('Failed to download report.');
+          wrappedBefore.forEach((wLine) => {
+            if (y + 10 > pageHeight - margin) {
+              doc.addPage();
+              y = margin;
+            }
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.text(wLine, margin, y);
+            y += 10;
+          });
+
+          wrappedInner.forEach((wLine) => {
+            if (y + 10 > pageHeight - margin) {
+              doc.addPage();
+              y = margin;
+            }
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(12);
+            doc.text(wLine, margin, y);
+            y += 10;
+          });
+
+          wrappedAfter.forEach((wLine) => {
+            if (y + 10 > pageHeight - margin) {
+              doc.addPage();
+              y = margin;
+            }
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.text(wLine, margin, y);
+            y += 10;
+          });
+        } else {
+          const wrapped = doc.splitTextToSize(line, maxWidth);
+          wrapped.forEach((wLine) => {
+            if (y + 10 > pageHeight - margin) {
+              doc.addPage();
+              y = margin;
+            }
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.text(wLine, margin, y);
+            y += 10;
+          });
+        }
+      } else {
+        // Normal paragraph text
+        const wrapped = doc.splitTextToSize(line, maxWidth);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+
+        wrapped.forEach((wLine) => {
+          if (y + 10 > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+          }
+          doc.text(wLine, margin, y);
+          y += 10;
+        });
+      }
+    });
+
+    // Add Page Numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
     }
-  };
 
-  console.log('====', reportData);
+    doc.save('report.pdf');
+  };
 
   return (
     <>
+      <div
+        ref={hiddenRef}
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 0,
+          width: '800px', // You can adjust this
+          padding: '20px',
+          backgroundColor: '#fff',
+          color: '#000',
+          zIndex: -1,
+        }}
+      />
       <ToastContainer />
       <div className={styles.container}>
         <Head>
@@ -175,7 +291,7 @@ export default function Home() {
                     <Button onClick={visitSubjectiveEvaluation}>
                       Data Input
                     </Button>
-                    <Button onClick={downloadReport}>Download Report</Button>
+                    <Button onClick={handleDownload}>Download Report</Button>
                   </div>
                 </div>
               )}
@@ -201,6 +317,7 @@ export default function Home() {
                     marginTop: '1rem',
                     borderRadius: '8px',
                     backgroundColor: '#f9f9f9',
+                    textAlign: 'left',
                   }}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
@@ -272,6 +389,10 @@ export default function Home() {
 
         <style jsx global>{`
           html,
+          h1 {
+            text-align: center;
+          }
+          ,
           body {
             padding: 0;
             margin: 0;
