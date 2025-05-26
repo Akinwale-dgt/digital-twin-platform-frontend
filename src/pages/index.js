@@ -2,7 +2,7 @@ import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 import { Button } from '@mui/material';
-import ModelViewer from '../components/ModelViewer/ModelViewer';
+import ModelViewer from '../components/ModelViewer/Model.jsx';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
