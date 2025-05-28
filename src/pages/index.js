@@ -3,6 +3,7 @@ import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 import { Button } from '@mui/material';
 import ModelViewer from '../components/ModelViewer/Model';
+import html2canvas from 'html2canvas';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/router';
@@ -253,6 +254,95 @@ export default function Home() {
     doc.save('report.pdf');
   };
 
+
+const downloadDivContentAsPDF = async () => {
+  const original = document.getElementById('downloadableDiv');
+  if (!original) return;
+
+  // Step 1: Clone content into a hidden container
+  const clone = original.cloneNode(true);
+
+  const hiddenContainer = document.createElement('div');
+  hiddenContainer.style.position = 'fixed';
+  hiddenContainer.style.top = '0';
+  hiddenContainer.style.left = '0';
+  hiddenContainer.style.width = '800px';
+  hiddenContainer.style.zIndex = '-1';
+  hiddenContainer.style.opacity = '0';
+  hiddenContainer.style.pointerEvents = 'none';
+  hiddenContainer.appendChild(clone);
+
+  // Remove scrolling constraints
+  clone.style.maxHeight = 'none';
+  clone.style.overflowY = 'visible';
+
+  document.body.appendChild(hiddenContainer);
+
+  try {
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pdfWidth;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    const paddingBottom = 10; // Space at bottom
+    const fontSize = 10;
+    let heightLeft = imgHeight;
+    let position = 0;
+    let pageNumber = 1;
+
+    // First page
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+    // Divider & Footer
+    pdf.setDrawColor(150);
+    pdf.setLineWidth(0.5);
+    pdf.line(10, pdfHeight - paddingBottom, pdfWidth - 10, pdfHeight - paddingBottom);
+    pdf.setFontSize(fontSize);
+    pdf.text('Continued...', pdfWidth - 30, pdfHeight - 5);
+
+    heightLeft -= pdfHeight - paddingBottom;
+
+    while (heightLeft > 0) {
+      position -= pdfHeight - paddingBottom;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+      // If this is the last page
+      const isLastPage = heightLeft - (pdfHeight - paddingBottom) <= 0;
+
+      pdf.setDrawColor(150);
+      pdf.setLineWidth(0.5);
+      pdf.line(10, pdfHeight - paddingBottom, pdfWidth - 10, pdfHeight - paddingBottom);
+
+      pdf.setFontSize(fontSize);
+      pdf.text(
+        isLastPage ? 'End of Report' : 'Continued...',
+        pdfWidth - (isLastPage ? 35 : 30),
+        pdfHeight - 5
+      );
+
+      heightLeft -= pdfHeight - paddingBottom;
+      pageNumber++;
+    }
+
+    pdf.save('content.pdf');
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+  } finally {
+    // Clean up
+    document.body.removeChild(hiddenContainer);
+  }
+};
+
   return (
     <>
       <div
@@ -289,7 +379,9 @@ export default function Home() {
                     <Button onClick={visitSubjectiveEvaluation}>
                       Data Input
                     </Button>
-                    <Button onClick={handleDownload}>Download Report</Button>
+                    <Button onClick={downloadDivContentAsPDF}>
+                      Download Report
+                    </Button>
                   </div>
                 </div>
               )}
@@ -307,6 +399,7 @@ export default function Home() {
 
               {html ? (
                 <div
+                  id='downloadableDiv'
                   style={{
                     maxHeight: '800px',
                     overflowY: 'auto',
