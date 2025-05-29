@@ -106,6 +106,7 @@ export default function Home() {
   };
 
   const discomfortData = data?.data?.digital_twin?.discomfort?.raw_scores;
+  const exertionData = data?.data?.digital_twin?.exertion?.raw_scores;
   const cognitiveWorkload =
     data?.data?.digital_twin?.cognitive_load?.overall_score;
   const cognitiveLevel = (cognitiveWorkload / 120) * 100;
@@ -341,7 +342,7 @@ export default function Home() {
               </Button>
               <div className={styles.modelColumn}>
                 <ModelViewer
-                  data={discomfortData}
+                  data={{ ...discomfortData, exertion: exertionData }}
                   cognitive={true}
                   cognitiveLevel={cognitiveLevel}
                 />
