@@ -113,22 +113,21 @@ function Model(props) {
         // DISCOMFORT DATA -> BODY PARTS
         else if (data) {
           // Check for hand/wrist meshes (hand1, hand2, hand1.001, hand2.001)
-          if (
-            meshName.includes("hand") ||
-            meshName.includes("wrist") ||
-            meshName.includes("finger")
-          ) {
+          if ((meshName.includes('hand') || meshName.includes('wrist') || meshName.includes('finger')) && !meshName.includes('upper')) {
             targetColor = getThreeColor(getColorByNumber(data.hand_wrist));
-            bodyPart = "hand_wrist";
+            bodyPart = 'hand_wrist';
             dataValue = data.hand_wrist;
           }
-          // Check for upper arm/arm meshes (but exclude hand references)
-          else if (
-            (meshName.includes("arm") || meshName.includes("bicep")) &&
-            !meshName.includes("lower")
-          ) {
+          // Check for upper arm meshes (Upperhand L, Upper handR, upperarm) - UPPER ARM ONLY
+          else if (meshName.includes('upper') && (meshName.includes('hand') || meshName.includes('arm') || meshName.includes('bicep'))) {
             targetColor = getThreeColor(getColorByNumber(data.upper_arm));
-            bodyPart = "upper_arm";
+            bodyPart = 'upper_arm';
+            dataValue = data.upper_arm;
+          }
+          // Check for general arm meshes (fallback for arm parts that don't include 'upper' or 'hand')
+          else if (meshName.includes('arm') && !meshName.includes('upper') && !meshName.includes('hand') && !meshName.includes('lower')) {
+            targetColor = getThreeColor(getColorByNumber(data.upper_arm));
+            bodyPart = 'upper_arm';
             dataValue = data.upper_arm;
           }
           // Check for shoulder meshes
