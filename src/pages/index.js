@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
-import { Button } from '@mui/material';
+import { Button, Checkbox, ListItemText, MenuItem, Select } from '@mui/material';
 import ModelViewer from '../components/ModelViewer/Model';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,10 +16,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { jsPDF } from 'jspdf';
 import { decode } from 'he';
+import { BASE_URL } from '../env';
 
 export default function Home() {
   const router = useRouter();
   const [openAnalysis, setAnalysisOpen] = React.useState(false);
+  const [isNewSession, setNewSession] = React.useState('')
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -32,6 +34,17 @@ export default function Home() {
   const [polling, setPolling] = React.useState(false);
   const [html, setHtml] = React.useState('');
   const hiddenRef = React.useRef(null);
+  const [selectedRisks, setSelectedRisks] = React.useState([]);
+  const riskOptions = [
+    { label: 'Exo1', value: 1 },
+    { label: 'Exo2', value: 2 },
+    { label: 'Exo3', value: 3 },
+  ];
+
+const handleChange = (event) => {
+  setSelectedRisks(event.target.value);
+  console.log('Selected Risk --> ', selectedRisks)
+};
 
   // ✅ Convert markdown to HTML once reportData is loaded
   React.useEffect(() => {
@@ -40,11 +53,30 @@ export default function Home() {
     }
   }, [reportData]);
 
+  React.useEffect(() => {
+    axios
+      .get(`${BASE_URL}/session-check`, {
+        withCredentials: true, 
+      })
+      .then(
+        (response) => {
+          console.log(response);
+          setNewSession(response.data.message);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+  }, [reportData]);
+
+
   const getAnalysisResult = () => {
     setLoading(true);
 
     axios
-      .get('https://digital-twin-platform.onrender.com/api/analyze-data')
+      .post(`${BASE_URL}/analyze-data`, {exos: selectedRisks}, {
+        withCredentials: true,
+      })
       .then((response) => {
         const data = response.data;
         setData(data);
@@ -74,7 +106,7 @@ export default function Home() {
     const intervalId = setInterval(() => {
       axios
         .get(
-          `https://digital-twin-platform.onrender.com/api/report/${reportId}`
+          `${BASE_URL}/report/${reportId}`
         )
         .then((res) => {
           const status = res.data?.status;
@@ -111,8 +143,8 @@ export default function Home() {
     data?.data?.digital_twin?.cognitive_load?.overall_score;
   const cognitiveLevel = (cognitiveWorkload / 120) * 100;
 
-  const visitSubjectiveEvaluation = () => {
-    router.push('/subjective-evaluation');
+  const visitSubjectiveEvaluation = (no) => {
+    router.push(`/subjective-evaluation/${no}`);
   };
 
   const handleDownload = () => {
@@ -282,16 +314,36 @@ export default function Home() {
           <div className={styles.container}>
             <div className={styles.column}>
               {JSON.stringify(reportData) === '{}' && (
-                <Button onClick={visitSubjectiveEvaluation}>Data Input</Button>
+                <>
+                  <select
+                    onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
+                    defaultValue=""
+                    className={styles.buttonStyle}
+                  >
+                    <option value="" disabled>Data Input</option>
+                    <option value="1">Exo 1</option>
+                    <option value="2">Exo 2</option>
+                    <option value="3">Exo 3</option>
+                  </select>
+
+                  <h4>{isNewSession}</h4>
+                </>
               )}
               {JSON.stringify(reportData) !== '{}' && (
                 <div>
                   <div
                     style={{ display: 'flex', justifyContent: 'space-between' }}
                   >
-                    <Button onClick={visitSubjectiveEvaluation}>
-                      Data Input
-                    </Button>
+                    <select
+                    onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
+                    defaultValue=""
+                    className={styles.buttonStyle}
+                  >
+                    <option value="" disabled>Data Input</option>
+                    <option value="1">Exo 1</option>
+                    <option value="2">Exo 2</option>
+                    <option value="3">Exo 3</option>
+                  </select>
                     <Button onClick={handleDownload}>Download Report</Button>
                   </div>
                 </div>
@@ -330,7 +382,30 @@ export default function Home() {
             </div>
 
             <div className={styles.column}>
-              <Button onClick={getAnalysisResult}>
+              <Select
+                multiple
+                value={selectedRisks}
+                onChange={handleChange}
+                displayEmpty
+                renderValue={(selected) =>
+                  loading ? (
+                    <CircularProgress size={20} color="secondary" />
+                  ) : selected.length === 0 ? (
+                    'Select Exo'
+                  ) : (
+                    selected.join(', ')
+                  )
+                }
+                style={{ minWidth: 180 }}
+              >
+                {riskOptions.map((risk) => (
+                  <MenuItem key={risk.value} value={risk.value}>
+                    <Checkbox checked={selectedRisks.includes(risk.value)} />
+                    <ListItemText primary={risk.label} />
+                  </MenuItem>
+                ))}
+              </Select>
+              {!!selectedRisks.length && <Button onClick={getAnalysisResult}>
                 Analyse Risk{' '}
                 {loading && (
                   <CircularProgress
@@ -339,7 +414,8 @@ export default function Home() {
                     style={{ marginRight: '0.5rem' }}
                   />
                 )}
-              </Button>
+              </Button>}
+
               <div className={styles.modelColumn}>
                 <ModelViewer
                   data={{ ...discomfortData, exertion: exertionData }}
