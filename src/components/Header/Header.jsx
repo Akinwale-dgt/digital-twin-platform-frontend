@@ -161,7 +161,7 @@ export default function Header() {
           <Toolbar>
             <Button onClick={goHome} color="inherit" style={{marginRight: '650px'}}>Home</Button>
             <h1 style={{textAlign: 'center', display: 'contents'}}>
-               Digital Twin Platform
+              Exoskeleton Assessment
             </h1>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

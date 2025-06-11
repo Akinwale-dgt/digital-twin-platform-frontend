@@ -20,6 +20,7 @@
     "he": "^1.2.0",
     "highcharts": "^11.4.8",
     "highcharts-react-official": "^3.2.1",
+    "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",
     "jspdf": "^3.0.1",
     "marked": "^15.0.11",
