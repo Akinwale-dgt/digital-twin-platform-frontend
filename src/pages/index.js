@@ -326,7 +326,7 @@ const handleChange = (event) => {
                     defaultValue=""
                     className={styles.buttonStyle}
                   >
-                    <option value="" disabled>Data Input</option>
+                    <option value="" disabled>DATA INPUT</option>
                     <option value="1">Exo 1</option>
                     <option value="2">Exo 2</option>
                     <option value="3">Exo 3</option>
@@ -345,7 +345,7 @@ const handleChange = (event) => {
                     defaultValue=""
                     className={styles.buttonStyle}
                   >
-                    <option value="" disabled>Data Input</option>
+                    <option value="" disabled>DATA INPUT</option>
                     <option value="1">Exo 1</option>
                     <option value="2">Exo 2</option>
                     <option value="3">Exo 3</option>
@@ -429,11 +429,11 @@ const handleChange = (event) => {
                     <ModelArray twins={data.data.digital_twin} />
                   )}
 
-                  {!data?.data?.digital_twin && (
+                  {/* {!data?.data?.digital_twin && (
                     <ModelArray
                     twins={data?.data?.digital_twin?.length ? data.data.digital_twin : dummyTwin}
                   />
-                  )}
+                  )} */}
               {/* </div> */}
             </div>
           </div>
