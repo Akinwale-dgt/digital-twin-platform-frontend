@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState, useEffect } from "react";
+import React, { Suspense, useRef, useState, useEffect, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
@@ -11,9 +11,6 @@ function Model(props) {
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
   const [wireframeMode, setWireframeMode] = useState(true); // Enable wireframe by default
-
-  console.log("Received data:", data);
-  console.log("Cognitive level:", cognitiveLevel);
 
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
@@ -47,45 +44,79 @@ function Model(props) {
 
   const gltf = useLoader(GLTFLoader, "/images/DT.glb");
 
-  // Scan model for nodes and meshes when it loads
-  useEffect(() => {
-    if (gltf.scene) {
-      const nodes = {};
-      const meshes = [];
+  const clonedScene = useMemo(() => {
+  const clone = gltf.scene.clone(true);
 
-      console.log("🔍 Scanning GLB model for all nodes and meshes:");
-
-      gltf.scene.traverse((child) => {
-        // Store all named nodes
-        if (child.name && child.name.trim() !== "") {
-          nodes[child.name.toLowerCase()] = child;
-          console.log(
-            `📦 Found node: "${child.name}" at position:`,
-            child.position
-          );
-        }
-
-        // Store all meshes and their materials
-        if (child.isMesh) {
-          meshes.push(child);
-          originalMaterials.current.set(child.uuid, child.material.clone());
-          console.log(
-            `🎨 Found mesh: "${child.name}" | Material: ${child.material.type}`
-          );
-        }
-      });
-
-      setModelNodes(nodes);
-      setAllMeshes(meshes);
-      console.log("✅ Scanning complete. Nodes:", Object.keys(nodes));
-      console.log("✅ Total meshes found:", meshes.length);
+  clone.traverse((node) => {
+    if (node.isMesh) {
+      node.geometry = node.geometry.clone();
+      node.material = node.material.clone();
+      node.material.needsUpdate = true;
     }
-  }, [gltf]);
+  });
+
+  return clone;
+}, [gltf]);
+
+useEffect(() => {
+  if (!clonedScene) return;
+
+  const nodes = {};
+  const meshes = [];
+
+  clonedScene.traverse((child) => {
+    if (child.name && child.name.trim() !== "") {
+      nodes[child.name.toLowerCase()] = child;
+    }
+
+    if (child.isMesh) {
+      meshes.push(child);
+      originalMaterials.current.set(child.uuid, child.material.clone());
+    }
+  });
+
+  setModelNodes(nodes);
+  setAllMeshes(meshes);
+}, [clonedScene]);
+
+  // Scan model for nodes and meshes when it loads
+  // useEffect(() => {
+  //   if (gltf.scene) {
+  //     const nodes = {};
+  //     const meshes = [];
+
+  //     console.log("🔍 Scanning GLB model for all nodes and meshes:");
+
+  //     gltf.scene.traverse((child) => {
+  //       // Store all named nodes
+  //       if (child.name && child.name.trim() !== "") {
+  //         nodes[child.name.toLowerCase()] = child;
+  //         console.log(
+  //           `📦 Found node: "${child.name}" at position:`,
+  //           child.position
+  //         );
+  //       }
+
+  //       // Store all meshes and their materials
+  //       if (child.isMesh) {
+  //         meshes.push(child);
+  //         originalMaterials.current.set(child.uuid, child.material.clone());
+  //         console.log(
+  //           `🎨 Found mesh: "${child.name}" | Material: ${child.material.type}`
+  //         );
+  //       }
+  //     });
+
+  //     setModelNodes(nodes);
+  //     setAllMeshes(meshes);
+  //     console.log("✅ Scanning complete. Nodes:", Object.keys(nodes));
+  //     console.log("✅ Total meshes found:", meshes.length);
+  //   }
+  // }, [gltf]);
 
   // Apply color changes to actual model materials
   useEffect(() => {
     if (allMeshes.length > 0 && (data || cognitive || cognitiveLevel)) {
-      console.log("🎨 Applying material colors to model...");
 
       // Try to find and color specific meshes based on your actual GLB mesh names
       allMeshes.forEach((mesh) => {
@@ -251,7 +282,6 @@ function Model(props) {
             mesh.material.opacity = 0.3; // Lower opacity for unmapped parts
             mesh.material.needsUpdate = true;
           }
-          console.log(`⚪ No mapping found for mesh: "${mesh.name}"`);
         }
       });
     }
@@ -265,7 +295,7 @@ function Model(props) {
 
   return (
     <>
-      <primitive object={gltf.scene} ref={modelRef} scale={[2, 1.6, 2]} />
+      <primitive object={clonedScene} ref={modelRef} scale={[2, 1.6, 2]}  position={[0.025, -0.9, 1]}/>
       {/* Wireframe Toggle Button */}
       <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
         <button
@@ -543,12 +573,11 @@ const ModelViewer = (props) => {
   const { data, cognitive, cognitiveLevel } = props;
   const [state, setState] = useState(false);
 
-  console.log("ModelViewer props:", { data, cognitive, cognitiveLevel });
-
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ flex: 1, position: 'relative' }}>
       <Canvas
-        camera={{ position: [-55.5, 0, 10.25], fov: 9 }}
+        camera={{ position: [-55.5, 0, 10.25], fov: 45 }}
         style={{ height: "1300px", width: "100%", marginTop: "0px" }}
       >
         <ambientLight intensity={1.25} />
@@ -557,7 +586,7 @@ const ModelViewer = (props) => {
         <pointLight position={[10, 10, 10]} />
         <OrbitControls />
         <Suspense fallback={null}>
-          <Model position={[0.025, -0.9, 1]} props={props} />
+          <Model position={[0.025, -0.19, 1]} props={props} />
         </Suspense>
       </Canvas>
 
@@ -581,15 +610,8 @@ const ModelViewer = (props) => {
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
       >
-        <div style={{ fontWeight: "bold", marginBottom: "4px" }}>Controls:</div>
-        <div>• Drag: Rotate model</div>
-        <div>• Scroll: Zoom in/out</div>
-        <div>• Hover spheres: View details</div>
-        <div>• Toggle wireframe: See internal organs</div>
-        <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-          Wireframe mode reveals brain & heart
-        </div>
       </div>
+    </div>
     </div>
   );
 };

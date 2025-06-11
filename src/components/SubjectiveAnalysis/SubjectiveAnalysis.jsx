@@ -12,6 +12,7 @@ import FifthStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/FifthStep/Fift
 import styles from '../../components/SubjectiveEvaluation/SubjectiveEvaluation.module.css'
 import SixthStepAnalysis from '../SubjectiveAnalysis/StepAnalysis/SixthStep/SixthStep'
 import axios from 'axios';
+import { BASE_URL } from '../../env';
 
 const steps = ['Perceived Level of Discomfort', 'Cognitive Workload', 'Balance', 'Exertion', 'Situational Awareness', 'Overall Analysis'];
 
@@ -52,7 +53,7 @@ function renderStepContent(
 export default function SubjectiveAnalysisComponent() {
   const [data, setData] = React.useState({});
   const getAnalysisResult = () => {
-    axios.get('https://digital-twin-platform.onrender.com/api/analyze-subjective-data')
+    axios.get(`${BASE_URL}/analyze-subjective-data`)
   .then((response) => {
     setData(response.data)
   }, (error) => {

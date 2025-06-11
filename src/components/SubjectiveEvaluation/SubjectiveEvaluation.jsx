@@ -20,6 +20,7 @@ import SixthStepForm from './StepForms/SixthStep/SixthStep';
 import { useRouter } from 'next/router';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { BASE_URL } from '../../env';
 
 function getSteps() {
   const steps = [
@@ -52,8 +53,7 @@ function renderStepContent(step) {
   }
 }
 
-export default function SubjectiveEvaluationComponent() {
-  const [activeStep, setActiveStep] = useState(0);
+export default function SubjectiveEvaluationComponent({ activeStep, setActiveStep, exoID}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const currentValidationSchema = validationSchema[activeStep];
@@ -63,7 +63,7 @@ export default function SubjectiveEvaluationComponent() {
   const submitForm = (values) => {
     setLoading(true);
     axios
-      .post('https://digital-twin-platform.onrender.com/api/usability', {
+      .post(`${BASE_URL}/usability`, {
         ease_of_use: {
           don_and_doff: Number(values.donAndDoff),
           adjust_fitting: Number(values.adjustFitting),
@@ -88,6 +88,10 @@ export default function SubjectiveEvaluationComponent() {
           interfere_with_environment: Number(values.interfereWithEnvironment),
           satisfaction: Number(values.satisfaction),
         },
+        exoID: Number(exoID)
+      },
+      {
+        withCredentials: true,
       })
       .then(
         (response) => {
@@ -113,7 +117,7 @@ export default function SubjectiveEvaluationComponent() {
   const sendSituationalAwareness = (values) => {
     axios
       .post(
-        'https://digital-twin-platform.onrender.com/api/situational-awareness',
+        `${BASE_URL}/situational-awareness`,
         {
           instability_of_situation: Number(values.instabilityOfSituation),
           complexity_of_situation: Number(values.complexityOfSituation),
@@ -124,6 +128,10 @@ export default function SubjectiveEvaluationComponent() {
           spare_mental_capacity: Number(values.spareMentalCapacity),
           familiarity_with_situation: Number(values.familiarityWithSituation),
           information_quantity: Number(values.informationQuantity),
+          exoID: Number(exoID)
+        },
+        {
+          withCredentials: true,
         }
       )
       .then(
@@ -142,7 +150,7 @@ export default function SubjectiveEvaluationComponent() {
 
   const sendDiscomfortData = (values) => {
     axios
-      .post('https://digital-twin-platform.onrender.com/api/discomfort', {
+      .post(`${BASE_URL}/discomfort`, {
         hand_and_waist: Number(values.handWrist),
         upper_arm: Number(values.upperArm),
         shoulder: Number(values.shoulder),
@@ -150,6 +158,10 @@ export default function SubjectiveEvaluationComponent() {
         thigh: Number(values.thigh),
         lower_leg_and_foot: Number(values.lowerLegAndFoot),
         neck: Number(values.neck),
+        exoID: Number(exoID)
+      },
+      {
+        withCredentials: true,
       })
       .then(
         (response) => {
@@ -164,7 +176,7 @@ export default function SubjectiveEvaluationComponent() {
   const sendCognitiveWorkloadData = (values) => {
     axios
       .post(
-        'https://digital-twin-platform.onrender.com/api/cognitive-workload',
+        `${BASE_URL}/cognitive-workload`,
         {
           mental_demand: Number(values.mentalDemand),
           physical_demand: Number(values.physicalDemand),
@@ -172,6 +184,10 @@ export default function SubjectiveEvaluationComponent() {
           performance: Number(values.performance),
           effort: Number(values.effort),
           frustration: Number(values.frustration),
+          exoID: Number(exoID)
+        },
+        {
+          withCredentials: true,
         }
       )
       .then(
@@ -186,8 +202,12 @@ export default function SubjectiveEvaluationComponent() {
 
   const sendExertionData = (values) => {
     axios
-      .post('https://digital-twin-platform.onrender.com/api/exertion', {
+      .post(`${BASE_URL}/exertion`, {
         rate_of_exertion: Number(values.exertion),
+        exoID: Number(exoID)
+      },
+      {
+        withCredentials: true,
       })
       .then(
         (response) => {
@@ -201,8 +221,12 @@ export default function SubjectiveEvaluationComponent() {
 
   const sendBalanceData = (values) => {
     axios
-      .post('https://digital-twin-platform.onrender.com/api/balance', {
+      .post(`${BASE_URL}/balance`, {
         rate_of_balance: Number(values.balance),
+        exoID: Number(exoID)
+      },
+      {
+        withCredentials: true,
       })
       .then(
         (response) => {
