@@ -312,7 +312,7 @@ const handleChange = (event) => {
       <ToastContainer />
       <div className={styles.container}>
         <Head>
-          <title>Digital Twin Platform</title>
+          <title>Exoskeleton Decision-Support Platform</title>
           <link rel='icon' href='/favicon.ico' />
         </Head>
 
