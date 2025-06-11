@@ -74,9 +74,7 @@ const handleChange = (event) => {
     setLoading(true);
 
     axios
-      .post(`${BASE_URL}/analyze-data`, {exos: selectedRisks}, {
-        withCredentials: true,
-      })
+      .get(`${BASE_URL}/analyze-data`)
       .then((response) => {
         const data = response.data;
         setData(data);
@@ -416,13 +414,17 @@ const handleChange = (event) => {
                 )}
               </Button>}
 
-              <div className={styles.modelColumn}>
-                <ModelViewer
+              {/* <div> */}
+                {/* <ModelViewer
                   data={{ ...discomfortData, exertion: exertionData }}
                   cognitive={true}
                   cognitiveLevel={cognitiveLevel}
-                />
-              </div>
+                /> */}
+
+                  {data?.data?.digital_twin && (
+                    <ModelArray twins={data.data.digital_twin} />
+                  )}
+              {/* </div> */}
             </div>
           </div>
         </main>
@@ -482,6 +484,55 @@ const handleChange = (event) => {
           }
         `}</style>
       </div>
+    </>
+  );
+}
+
+
+
+function ModelArray({ twins }) {
+  return (
+    <>
+      <div
+      style={{
+        display: 'flex',
+        gap: '20px',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap', // allows responsiveness
+        marginTop: '2rem',
+      }}
+    >
+      {twins.slice(0, 3).map((twin, index) => {
+        const discomfortData = twin.discomfort?.raw_scores;
+        const exertionData = twin.exertion?.raw_scores;
+        const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
+        const cognitiveLevel = (cognitiveWorkload / 120) * 100;
+
+        return (
+          <div
+            key={twin.exoID ?? index}
+            style={{
+              flex: '1 1 1',
+              minWidth: '80px',
+              maxWidth: '450px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              background: '#fff',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              position: 'relative',
+            }}
+          >
+            <ModelViewer
+              data={{ ...discomfortData, exertion: exertionData }}
+              cognitive
+              cognitiveLevel={cognitiveLevel}
+            />
+          </div>
+        );
+      })}
+    </div>
     </>
   );
 }

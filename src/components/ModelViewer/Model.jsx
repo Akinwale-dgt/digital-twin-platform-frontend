@@ -546,7 +546,8 @@ const ModelViewer = (props) => {
   console.log("ModelViewer props:", { data, cognitive, cognitiveLevel });
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ flex: 1, position: 'relative' }}>
       <Canvas
         camera={{ position: [-55.5, 0, 10.25], fov: 9 }}
         style={{ height: "1300px", width: "100%", marginTop: "0px" }}
@@ -581,15 +582,8 @@ const ModelViewer = (props) => {
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
         }}
       >
-        <div style={{ fontWeight: "bold", marginBottom: "4px" }}>Controls:</div>
-        <div>• Drag: Rotate model</div>
-        <div>• Scroll: Zoom in/out</div>
-        <div>• Hover spheres: View details</div>
-        <div>• Toggle wireframe: See internal organs</div>
-        <div style={{ fontSize: "10px", color: "#666", marginTop: "4px" }}>
-          Wireframe mode reveals brain & heart
-        </div>
       </div>
+    </div>
     </div>
   );
 };
