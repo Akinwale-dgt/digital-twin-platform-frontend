@@ -11,6 +11,7 @@ import ThirdStepForm from './StepForms/ThirdStep/ThirdStep';
 import { useRouter } from 'next/router'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { BASE_URL } from '../../env';
 
 function getSteps() {
   const steps = ['Cognitive Workload', 'Fall Risk', 'Exertion'];
@@ -55,7 +56,7 @@ export default function ObjectiveEvaluationComponent() {
     exertionRequestBody.append('input-data', values.exertion[0])
     exertionRequestBody.append('measure', 'exertion')
 
-    axios.post('https://digital-twin-platform.onrender.com/api/upload-file', exertionRequestBody)
+    axios.post(`${BASE_URL}/upload-file`, exertionRequestBody)
     .then((response) => {
       toast.success('Files uploaded successfully', {
         position: "top-right"
@@ -82,7 +83,7 @@ const sendCognitiveWorkloadData = (values) => {
   cognitiveWorkloadRequestBody.append('input-data', values.cognitiveWorkloads[0])
   cognitiveWorkloadRequestBody.append('measure', 'cognitive-workload')
 
-  axios.post('https://digital-twin-platform.onrender.com/api/upload-file', cognitiveWorkloadRequestBody)
+  axios.post(`${BASE_URL}/upload-file`, cognitiveWorkloadRequestBody)
   .then((response)=> {
     console.log(response);
   },(error)=>{
@@ -96,7 +97,7 @@ const sendFallRiskData = (values) => {
   fallRiskRequestBody.append('input-data', values.fallRisk[0])
   fallRiskRequestBody.append('measure', 'fall-risk')
 
-  axios.post('https://digital-twin-platform.onrender.com/api/upload-file', fallRiskRequestBody)
+  axios.post(`${BASE_URL}/upload-file`, fallRiskRequestBody)
   .then((response)=> {
     console.log(response);
   },(error)=>{
