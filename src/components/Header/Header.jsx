@@ -160,9 +160,9 @@ export default function Header() {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
           <Toolbar>
-            <Button onClick={goHome} color="inherit" style={{marginRight: '300px'}}>Home</Button>
+            <Button onClick={goHome} color="inherit" style={{marginRight: '40%'}}>Home</Button>
             <h1 style={{textAlign: 'center', display: 'contents'}}>
-            Exoskeleton Decision-Support Platform
+              Exoskeleton Decision-Support Platform
             </h1>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
