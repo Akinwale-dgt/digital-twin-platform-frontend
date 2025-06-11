@@ -19,7 +19,14 @@ function Model(props) {
   const originalMaterials = useRef(new Map());
 
   // Color mapping functions
-  const getColorByNumber = (num) => {
+  const getColorByNumber = (num, percentDiff) => {
+    if (percentDiff) {
+      if (!num && num !== 0) return "grey";
+      if (num > 15) return "red";
+      if (num > 11) return "orange";
+      return "green";
+    }
+
     if (!num && num !== 0) return "grey";
     if (num > 6) return "red";
     if (num > 3) return "orange";
@@ -106,7 +113,7 @@ function Model(props) {
         }
         // EXERTION -> HEART ONLY
         else if (meshName.includes("heart") && data?.exertion !== undefined) {
-          targetColor = getThreeColor(getColorByNumber(data.exertion));
+          targetColor = getThreeColor(getColorByNumber(data.exertion, "20%"));
           bodyPart = "heart (exertion)";
           dataValue = data.exertion;
         }
@@ -114,17 +121,31 @@ function Model(props) {
         else if (data) {
           // Check for hand/wrist meshes (hand1, hand2, hand1.001, hand2.001)
           if (
-            meshName.includes("hand") ||
-            meshName.includes("wrist") ||
-            meshName.includes("finger")
+            (meshName.includes("hand") ||
+              meshName.includes("wrist") ||
+              meshName.includes("finger")) &&
+            !meshName.includes("upper")
           ) {
             targetColor = getThreeColor(getColorByNumber(data.hand_wrist));
             bodyPart = "hand_wrist";
             dataValue = data.hand_wrist;
           }
-          // Check for upper arm/arm meshes (but exclude hand references)
+          // Check for upper arm meshes (Upperhand L, Upper handR, upperarm) - UPPER ARM ONLY
           else if (
-            (meshName.includes("arm") || meshName.includes("bicep")) &&
+            meshName.includes("upper") &&
+            (meshName.includes("hand") ||
+              meshName.includes("arm") ||
+              meshName.includes("bicep"))
+          ) {
+            targetColor = getThreeColor(getColorByNumber(data.upper_arm));
+            bodyPart = "upper_arm";
+            dataValue = data.upper_arm;
+          }
+          // Check for general arm meshes (fallback for arm parts that don't include 'upper' or 'hand')
+          else if (
+            meshName.includes("arm") &&
+            !meshName.includes("upper") &&
+            !meshName.includes("hand") &&
             !meshName.includes("lower")
           ) {
             targetColor = getThreeColor(getColorByNumber(data.upper_arm));
@@ -262,7 +283,6 @@ function Model(props) {
   const toggleWireframe = () => {
     setWireframeMode(!wireframeMode);
   };
-
 
   return (
     <>
@@ -430,42 +450,43 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
               Body Part Discomfort
             </h4>
             <div style={{ display: "grid", gap: "4px" }}>
-              {Object.entries(data).filter(([part, value]) => !['shoulder'].includes(part)).map(([part, value]) => (
-
-                <div
-                  key={part}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontSize: "12px",
-                  }}
-                >
-                  <span style={{ textTransform: "capitalize" }}>
-                    {part.replace("_", " ")}:
-                  </span>
+              {Object.entries(data)
+                .filter(([part, value]) => !["shoulder"].includes(part))
+                .map(([part, value]) => (
                   <div
+                    key={part}
                     style={{
                       display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: "8px",
+                      fontSize: "12px",
                     }}
                   >
-                    <span>{value?.toFixed(1)}</span>
-                    <span
+                    <span style={{ textTransform: "capitalize" }}>
+                      {part.replace("_", " ")}:
+                    </span>
+                    <div
                       style={{
-                        padding: "1px 6px",
-                        borderRadius: "3px",
-                        color: "white",
-                        fontSize: "10px",
-                        backgroundColor: getColorByNumber(value),
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                       }}
                     >
-                      {getRiskLevel(value)}
-                    </span>
+                      <span>{value?.toFixed(1)}</span>
+                      <span
+                        style={{
+                          padding: "1px 6px",
+                          borderRadius: "3px",
+                          color: "white",
+                          fontSize: "10px",
+                          backgroundColor: getColorByNumber(value),
+                        }}
+                      >
+                        {getRiskLevel(value)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}
