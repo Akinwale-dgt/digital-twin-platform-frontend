@@ -43,7 +43,6 @@ export default function Home() {
 
 const handleChange = (event) => {
   setSelectedRisks(event.target.value);
-  console.log('Selected Risk --> ', selectedRisks)
 };
 
   // ✅ Convert markdown to HTML once reportData is loaded
@@ -286,6 +285,15 @@ const handleChange = (event) => {
     doc.save('report.pdf');
   };
 
+  const dummyTwin = [
+    {
+      exoID: 0,
+      discomfort: { raw_scores: { hand_wrist: 2, upper_arm: 3, shoulder: 1, chest: 2, lower_back: 3, thigh: 2, lower_leg_foot: 2, head: 1, neck: 2 } },
+      exertion: { raw_scores: 2 },
+      cognitive_load: { overall_score: 25 },
+    },
+  ];
+
   return (
     <>
       <div
@@ -391,7 +399,11 @@ const handleChange = (event) => {
                   ) : selected.length === 0 ? (
                     'Select Exo'
                   ) : (
-                    selected.join(', ')
+                    selected.map((value) => {
+                      const match = riskOptions.find((risk) => risk.value === value);
+                      return match?.label || value;
+                    })
+                    .join(', ')
                   )
                 }
                 style={{ minWidth: 180 }}
@@ -413,16 +425,14 @@ const handleChange = (event) => {
                   />
                 )}
               </Button>}
-
-              {/* <div> */}
-                {/* <ModelViewer
-                  data={{ ...discomfortData, exertion: exertionData }}
-                  cognitive={true}
-                  cognitiveLevel={cognitiveLevel}
-                /> */}
-
                   {data?.data?.digital_twin && (
                     <ModelArray twins={data.data.digital_twin} />
+                  )}
+
+                  {!data?.data?.digital_twin && (
+                    <ModelArray
+                    twins={data?.data?.digital_twin?.length ? data.data.digital_twin : dummyTwin}
+                  />
                   )}
               {/* </div> */}
             </div>
@@ -496,10 +506,9 @@ function ModelArray({ twins }) {
       <div
       style={{
         display: 'flex',
-        gap: '20px',
+        gap: '10px',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        flexWrap: 'wrap', // allows responsiveness
         marginTop: '2rem',
       }}
     >
@@ -514,11 +523,10 @@ function ModelArray({ twins }) {
             key={twin.exoID ?? index}
             style={{
               flex: '1 1 1',
-              minWidth: '80px',
-              maxWidth: '450px',
+              minWidth: '250px',
+              maxWidth: '250px',
               border: '1px solid #e0e0e0',
               borderRadius: '10px',
-              overflow: 'hidden',
               background: '#fff',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
               position: 'relative',
