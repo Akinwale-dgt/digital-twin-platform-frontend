@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
-import { Button } from '@mui/material';
+import { Button, Checkbox, ListItemText, MenuItem, Select } from '@mui/material';
 import ModelViewer from '../components/ModelViewer/Model';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,10 +16,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { jsPDF } from 'jspdf';
 import { decode } from 'he';
+import { BASE_URL } from '../env';
 
 export default function Home() {
   const router = useRouter();
   const [openAnalysis, setAnalysisOpen] = React.useState(false);
+  const [isNewSession, setNewSession] = React.useState('')
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -32,6 +34,16 @@ export default function Home() {
   const [polling, setPolling] = React.useState(false);
   const [html, setHtml] = React.useState('');
   const hiddenRef = React.useRef(null);
+  const [selectedRisks, setSelectedRisks] = React.useState([]);
+  const riskOptions = [
+    { label: 'Exo1', value: 1 },
+    { label: 'Exo2', value: 2 },
+    { label: 'Exo3', value: 3 },
+  ];
+
+const handleChange = (event) => {
+  setSelectedRisks(event.target.value);
+};
 
   // ✅ Convert markdown to HTML once reportData is loaded
   React.useEffect(() => {
@@ -40,11 +52,28 @@ export default function Home() {
     }
   }, [reportData]);
 
+  React.useEffect(() => {
+    axios
+      .get(`${BASE_URL}/session-check`, {
+        withCredentials: true, 
+      })
+      .then(
+        (response) => {
+          console.log(response);
+          setNewSession(response.data.message);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+  }, [reportData]);
+
+
   const getAnalysisResult = () => {
     setLoading(true);
 
     axios
-      .get('https://digital-twin-platform.onrender.com/api/analyze-data')
+      .get(`${BASE_URL}/analyze-data`)
       .then((response) => {
         const data = response.data;
         setData(data);
@@ -74,7 +103,7 @@ export default function Home() {
     const intervalId = setInterval(() => {
       axios
         .get(
-          `https://digital-twin-platform.onrender.com/api/report/${reportId}`
+          `${BASE_URL}/report/${reportId}`
         )
         .then((res) => {
           const status = res.data?.status;
@@ -111,8 +140,8 @@ export default function Home() {
     data?.data?.digital_twin?.cognitive_load?.overall_score;
   const cognitiveLevel = (cognitiveWorkload / 120) * 100;
 
-  const visitSubjectiveEvaluation = () => {
-    router.push('/subjective-evaluation');
+  const visitSubjectiveEvaluation = (no) => {
+    router.push(`/subjective-evaluation/${no}`);
   };
 
   const handleDownload = () => {
@@ -256,6 +285,15 @@ export default function Home() {
     doc.save('report.pdf');
   };
 
+  const dummyTwin = [
+    {
+      exoID: 0,
+      discomfort: { raw_scores: { hand_wrist: 2, upper_arm: 3, shoulder: 1, chest: 2, lower_back: 3, thigh: 2, lower_leg_foot: 2, head: 1, neck: 2 } },
+      exertion: { raw_scores: 2 },
+      cognitive_load: { overall_score: 25 },
+    },
+  ];
+
   return (
     <>
       <div
@@ -274,7 +312,7 @@ export default function Home() {
       <ToastContainer />
       <div className={styles.container}>
         <Head>
-          <title>Digital Twin Platform</title>
+          <title>Exoskeleton Decision-Support Platform</title>
           <link rel='icon' href='/favicon.ico' />
         </Head>
 
@@ -282,16 +320,36 @@ export default function Home() {
           <div className={styles.container}>
             <div className={styles.column}>
               {JSON.stringify(reportData) === '{}' && (
-                <Button onClick={visitSubjectiveEvaluation}>Data Input</Button>
+                <>
+                  <select
+                    onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
+                    defaultValue=""
+                    className={styles.buttonStyle}
+                  >
+                    <option value="" disabled>DATA INPUT</option>
+                    <option value="1">Exo 1</option>
+                    <option value="2">Exo 2</option>
+                    <option value="3">Exo 3</option>
+                  </select>
+
+                  <h4>{isNewSession}</h4>
+                </>
               )}
               {JSON.stringify(reportData) !== '{}' && (
                 <div>
                   <div
                     style={{ display: 'flex', justifyContent: 'space-between' }}
                   >
-                    <Button onClick={visitSubjectiveEvaluation}>
-                      Data Input
-                    </Button>
+                    <select
+                    onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
+                    defaultValue=""
+                    className={styles.buttonStyle}
+                  >
+                    <option value="" disabled>DATA INPUT</option>
+                    <option value="1">Exo 1</option>
+                    <option value="2">Exo 2</option>
+                    <option value="3">Exo 3</option>
+                  </select>
                     <Button onClick={handleDownload}>Download Report</Button>
                   </div>
                 </div>
@@ -330,7 +388,34 @@ export default function Home() {
             </div>
 
             <div className={styles.column}>
-              <Button onClick={getAnalysisResult}>
+              <Select
+                multiple
+                value={selectedRisks}
+                onChange={handleChange}
+                displayEmpty
+                renderValue={(selected) =>
+                  loading ? (
+                    <CircularProgress size={20} color="secondary" />
+                  ) : selected.length === 0 ? (
+                    'Select Exo'
+                  ) : (
+                    selected.map((value) => {
+                      const match = riskOptions.find((risk) => risk.value === value);
+                      return match?.label || value;
+                    })
+                    .join(', ')
+                  )
+                }
+                style={{ minWidth: 180 }}
+              >
+                {riskOptions.map((risk) => (
+                  <MenuItem key={risk.value} value={risk.value}>
+                    <Checkbox checked={selectedRisks.includes(risk.value)} />
+                    <ListItemText primary={risk.label} />
+                  </MenuItem>
+                ))}
+              </Select>
+              {!!selectedRisks.length && <Button onClick={getAnalysisResult}>
                 Analyse Risk{' '}
                 {loading && (
                   <CircularProgress
@@ -339,14 +424,17 @@ export default function Home() {
                     style={{ marginRight: '0.5rem' }}
                   />
                 )}
-              </Button>
-              <div className={styles.modelColumn}>
-                <ModelViewer
-                  data={{ ...discomfortData, exertion: exertionData }}
-                  cognitive={true}
-                  cognitiveLevel={cognitiveLevel}
-                />
-              </div>
+              </Button>}
+                  {data?.data?.digital_twin && (
+                    <ModelArray twins={data.data.digital_twin} />
+                  )}
+
+                  {/* {!data?.data?.digital_twin && (
+                    <ModelArray
+                    twins={data?.data?.digital_twin?.length ? data.data.digital_twin : dummyTwin}
+                  />
+                  )} */}
+              {/* </div> */}
             </div>
           </div>
         </main>
@@ -406,6 +494,53 @@ export default function Home() {
           }
         `}</style>
       </div>
+    </>
+  );
+}
+
+
+
+function ModelArray({ twins }) {
+  return (
+    <>
+      <div
+      style={{
+        display: 'flex',
+        gap: '10px',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        marginTop: '2rem',
+      }}
+    >
+      {twins.slice(0, 3).map((twin, index) => {
+        const discomfortData = twin.discomfort?.raw_scores;
+        const exertionData = twin.exertion?.raw_scores;
+        const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
+        const cognitiveLevel = (cognitiveWorkload / 120) * 100;
+
+        return (
+          <div
+            key={twin.exoID ?? index}
+            style={{
+              flex: '1 1 1',
+              minWidth: '250px',
+              maxWidth: '250px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '10px',
+              background: '#fff',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              position: 'relative',
+            }}
+          >
+            <ModelViewer
+              data={{ ...discomfortData, exertion: exertionData }}
+              cognitive
+              cognitiveLevel={cognitiveLevel}
+            />
+          </div>
+        );
+      })}
+    </div>
     </>
   );
 }

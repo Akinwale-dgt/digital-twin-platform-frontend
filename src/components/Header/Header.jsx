@@ -20,6 +20,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import CircularProgress from '@mui/material/CircularProgress';
+import { BASE_URL } from '../../env';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -63,7 +64,7 @@ export default function Header() {
 
   const resetDB = () => {
     setLoading(true)
-    axios.delete('https://digital-twin-platform.onrender.com/api/reset')
+    axios.delete(`${BASE_URL}/reset`)
     .then((response) => {
       toast.success(response, {
         position: "top-right"
@@ -159,9 +160,9 @@ export default function Header() {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
           <Toolbar>
-            <Button onClick={goHome} color="inherit" style={{marginRight: '650px'}}>Home</Button>
+            <Button onClick={goHome} color="inherit" style={{marginRight: '40%'}}>Home</Button>
             <h1 style={{textAlign: 'center', display: 'contents'}}>
-               Digital Twin Platform
+              Exoskeleton Decision-Support Platform
             </h1>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
