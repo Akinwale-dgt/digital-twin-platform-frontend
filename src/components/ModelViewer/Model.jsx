@@ -394,7 +394,14 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
     return "#4CAF50";
   };
 
-  const getRiskLevel = (num) => {
+  const getRiskLevel = (num, percentDiff) => {
+    if (percentDiff) {
+      if (!num && num !== 0) return "Low";
+      if (num > 15) return "High";
+      if (num > 11) return "Medium";
+      return "Low";
+    }
+
     if (!num && num !== 0) return "Low";
     if (num > 6) return "High";
     if (num > 3) return "Medium";
