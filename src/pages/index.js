@@ -177,7 +177,7 @@ export default function Home() {
     headerDiv.style.paddingBottom = "15px";
 
     headerDiv.innerHTML = `
-    <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #333; word-spacing: normal; letter-spacing: normal;">${"Exoskeleton   Decision -Support"}</h1>
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #333; word-spacing: normal; letter-spacing: normal;">${"Exoskeleton-   Decision -Support"}</h1>
     <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Generated: ${currentDate}</p>
   `;
 
