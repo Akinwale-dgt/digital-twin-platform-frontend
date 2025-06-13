@@ -406,7 +406,7 @@ export default function Home() {
       const imgWidth = pdfWidth;
       const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-      const paddingBottom = 20; // Increased padding to avoid text cutoff
+      const paddingBottom = 25; // Increased padding for cleaner separation
       const availableHeight = pdfHeight - paddingBottom;
 
       let heightLeft = imgHeight;
@@ -416,22 +416,27 @@ export default function Home() {
 
       console.log("PDF info:", { imgHeight, availableHeight, totalPages });
 
-      // Add first page
+      // Add first page with content masking
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-      // Add footer for first page - ensure no content overlaps
-      const footerY = Math.min(pdfHeight - 10, pdfHeight - paddingBottom + 8);
+      // Add a white rectangle to mask any content that bleeds into footer area
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, pdfHeight - paddingBottom, pdfWidth, paddingBottom, "F");
+
+      // Add footer for first page
+      const footerLineY = pdfHeight - paddingBottom + 3;
+      const footerTextY = pdfHeight - 8;
 
       pdf.setDrawColor(200, 200, 200);
       pdf.setLineWidth(0.3);
-      pdf.line(10, footerY - 5, pdfWidth - 10, footerY - 5);
+      pdf.line(10, footerLineY, pdfWidth - 10, footerLineY);
 
       pdf.setFontSize(8);
       pdf.setTextColor(120, 120, 120);
-      pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, footerY);
+      pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, footerTextY);
 
       if (totalPages > 1) {
-        pdf.text("Continued...", pdfWidth - 25, footerY);
+        pdf.text("Continued...", pdfWidth - 25, footerTextY);
       }
 
       heightLeft -= availableHeight;
@@ -442,29 +447,28 @@ export default function Home() {
         pdf.addPage();
         pageNumber++;
 
+        // Add content
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-        const isLastPage = heightLeft <= availableHeight;
+        // Mask any content bleeding into footer area
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, pdfHeight - paddingBottom, pdfWidth, paddingBottom, "F");
 
-        // Calculate footer position to avoid content overlap
-        const currentFooterY = Math.min(
-          pdfHeight - 10,
-          pdfHeight - paddingBottom + 8
-        );
+        const isLastPage = heightLeft <= availableHeight;
 
         // Add footer
         pdf.setDrawColor(200, 200, 200);
         pdf.setLineWidth(0.3);
-        pdf.line(10, currentFooterY - 5, pdfWidth - 10, currentFooterY - 5);
+        pdf.line(10, footerLineY, pdfWidth - 10, footerLineY);
 
         pdf.setFontSize(8);
         pdf.setTextColor(120, 120, 120);
-        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, currentFooterY);
+        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, footerTextY);
 
         if (isLastPage) {
-          pdf.text("End of Report", pdfWidth - 28, currentFooterY);
+          pdf.text("End of Report", pdfWidth - 28, footerTextY);
         } else {
-          pdf.text("Continued...", pdfWidth - 25, currentFooterY);
+          pdf.text("Continued...", pdfWidth - 25, footerTextY);
         }
 
         heightLeft -= availableHeight;
