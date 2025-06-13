@@ -152,50 +152,131 @@ export default function Home() {
       return;
     }
 
-    // Step 1: Clone content into a hidden container
+    // Step 1: Create a properly formatted container for PDF
+    const pdfContainer = document.createElement("div");
+    pdfContainer.style.position = "fixed";
+    pdfContainer.style.top = "0";
+    pdfContainer.style.left = "0";
+    pdfContainer.style.width = "800px";
+    pdfContainer.style.height = "auto";
+    pdfContainer.style.zIndex = "-1";
+    pdfContainer.style.opacity = "0";
+    pdfContainer.style.pointerEvents = "none";
+    pdfContainer.style.backgroundColor = "white";
+    pdfContainer.style.padding = "30px";
+    pdfContainer.style.fontFamily =
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    pdfContainer.style.fontSize = "14px";
+    pdfContainer.style.lineHeight = "1.6";
+    pdfContainer.style.color = "#000";
+
+    // Step 2: Add header information
+    const currentDate = new Date().toLocaleDateString("en-GB");
+    const headerHtml = `
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #333;">Digital Twin Report</h1>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Generated: ${currentDate}</p>
+    </div>
+  `;
+
+    // Step 3: Clone and clean up the original content
     const clone = original.cloneNode(true);
 
-    const hiddenContainer = document.createElement("div");
-    hiddenContainer.style.position = "fixed";
-    hiddenContainer.style.top = "0";
-    hiddenContainer.style.left = "0";
-    hiddenContainer.style.width = "800px";
-    hiddenContainer.style.height = "auto"; // Let it expand naturally
-    hiddenContainer.style.zIndex = "-1";
-    hiddenContainer.style.opacity = "0";
-    hiddenContainer.style.pointerEvents = "none";
-    hiddenContainer.style.backgroundColor = "white";
-    hiddenContainer.appendChild(clone);
+    // Remove any background colors and improve formatting
+    const cleanupElement = (element) => {
+      if (element.style) {
+        element.style.backgroundColor = "transparent";
+        element.style.background = "none";
+        element.style.maxHeight = "none";
+        element.style.overflow = "visible";
+        element.style.border = "none";
+        element.style.borderRadius = "0";
+        element.style.boxShadow = "none";
+      }
 
-    // Remove scrolling constraints and ensure full content is visible
-    clone.style.maxHeight = "none";
-    clone.style.overflowY = "visible";
-    clone.style.overflow = "visible";
-    clone.style.height = "auto";
+      // Improve heading spacing
+      if (element.tagName && element.tagName.match(/^H[1-6]$/)) {
+        element.style.marginTop = "25px";
+        element.style.marginBottom = "15px";
+        element.style.lineHeight = "1.3";
+        element.style.fontWeight = "bold";
+        element.style.color = "#333";
 
-    document.body.appendChild(hiddenContainer);
+        // Fix title spacing issues
+        if (element.tagName === "H1") {
+          element.style.fontSize = "22px";
+          element.style.wordSpacing = "normal";
+          element.style.letterSpacing = "normal";
+        }
+      }
+
+      // Improve paragraph spacing
+      if (element.tagName === "P") {
+        element.style.marginBottom = "12px";
+        element.style.lineHeight = "1.6";
+      }
+
+      // Improve table formatting
+      if (element.tagName === "TABLE") {
+        element.style.width = "100%";
+        element.style.borderCollapse = "collapse";
+        element.style.marginBottom = "20px";
+      }
+
+      if (element.tagName === "TD" || element.tagName === "TH") {
+        element.style.padding = "8px";
+        element.style.border = "1px solid #ddd";
+        element.style.textAlign = "left";
+      }
+
+      if (element.tagName === "TH") {
+        element.style.backgroundColor = "#f5f5f5";
+        element.style.fontWeight = "bold";
+      }
+
+      // Recursively clean child elements
+      for (let child of element.children) {
+        cleanupElement(child);
+      }
+    };
+
+    cleanupElement(clone);
+
+    // Step 4: Combine header and content
+    pdfContainer.innerHTML = headerHtml + clone.innerHTML;
+
+    document.body.appendChild(pdfContainer);
 
     try {
-      // Wait a bit for fonts and styles to load
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for fonts and styles to load
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const canvas = await html2canvas(clone, {
+      const canvas = await html2canvas(pdfContainer, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
-        width: clone.scrollWidth,
-        height: clone.scrollHeight,
+        width: pdfContainer.scrollWidth,
+        height: pdfContainer.scrollHeight,
         onclone: (clonedDoc) => {
-          // Ensure the cloned document has all styles applied
-          const clonedElement =
-            clonedDoc.getElementById(clone.id) ||
-            clonedDoc.querySelector("div");
-          if (clonedElement) {
-            clonedElement.style.maxHeight = "none";
-            clonedElement.style.overflow = "visible";
+          // Ensure consistent styling in cloned document
+          const style = clonedDoc.createElement("style");
+          style.textContent = `
+          * { 
+            box-sizing: border-box; 
+            background: transparent !important;
+            background-color: transparent !important;
           }
+          h1, h2, h3 { 
+            word-spacing: normal !important; 
+            letter-spacing: normal !important;
+            line-height: 1.3 !important;
+          }
+          table { border-collapse: collapse !important; }
+          td, th { padding: 8px !important; border: 1px solid #ddd !important; }
+        `;
+          clonedDoc.head.appendChild(style);
         },
       });
 
@@ -208,20 +289,20 @@ export default function Home() {
       const imgWidth = pdfWidth;
       const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-      const paddingBottom = 15; // Space at bottom for footer
+      const paddingBottom = 15;
       const availableHeight = pdfHeight - paddingBottom;
       const fontSize = 8;
 
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
+      let totalPages = Math.ceil(imgHeight / availableHeight);
 
-      // Add first page
+      // Add first page with page counter
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-      // Only add footer if there's more content
-      if (heightLeft > availableHeight) {
-        // Add divider line
+      // Add page footer for first page
+      if (totalPages > 1) {
         pdf.setDrawColor(200, 200, 200);
         pdf.setLineWidth(0.3);
         pdf.line(
@@ -231,10 +312,24 @@ export default function Home() {
           pdfHeight - paddingBottom + 3
         );
 
-        // Add "Continued..." text
         pdf.setFontSize(fontSize);
         pdf.setTextColor(120, 120, 120);
+        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, pdfHeight - 3);
         pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
+      } else {
+        // Single page - just add page number
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.3);
+        pdf.line(
+          10,
+          pdfHeight - paddingBottom + 3,
+          pdfWidth - 10,
+          pdfHeight - paddingBottom + 3
+        );
+
+        pdf.setFontSize(fontSize);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, pdfHeight - 3);
       }
 
       heightLeft -= availableHeight;
@@ -247,10 +342,9 @@ export default function Home() {
 
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-        // Determine if this is the last page
         const isLastPage = heightLeft <= availableHeight;
 
-        // Add footer line
+        // Add footer
         pdf.setDrawColor(200, 200, 200);
         pdf.setLineWidth(0.3);
         pdf.line(
@@ -260,9 +354,9 @@ export default function Home() {
           pdfHeight - paddingBottom + 3
         );
 
-        // Add appropriate footer text
         pdf.setFontSize(fontSize);
         pdf.setTextColor(120, 120, 120);
+        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, pdfHeight - 3);
 
         if (isLastPage) {
           pdf.text("End of Report", pdfWidth - 28, pdfHeight - 3);
@@ -270,31 +364,22 @@ export default function Home() {
           pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
         }
 
-        // Add page number (optional)
-        pdf.text(`Page ${pageNumber}`, 10, pdfHeight - 3);
-
         heightLeft -= availableHeight;
       }
 
       // Generate filename with timestamp
-      const timestamp = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace(/:/g, "-");
-      const filename = `exoskeleton-report-${timestamp}.pdf`;
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `Digital-Twin-Report-${timestamp}.pdf`;
 
       pdf.save(filename);
 
-      // Show success message
       console.log("PDF generated successfully");
     } catch (err) {
       console.error("PDF generation failed:", err);
-      // You might want to show a toast notification here
-      // toast.error("Failed to generate PDF. Please try again.");
     } finally {
       // Clean up
-      if (document.body.contains(hiddenContainer)) {
-        document.body.removeChild(hiddenContainer);
+      if (document.body.contains(pdfContainer)) {
+        document.body.removeChild(pdfContainer);
       }
     }
   };
