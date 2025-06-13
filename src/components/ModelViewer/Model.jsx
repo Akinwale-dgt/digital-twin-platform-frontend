@@ -316,7 +316,7 @@ useEffect(() => {
 
   return (
     <>
-      <primitive object={clonedScene} ref={modelRef} scale={[2, 1.6, 2]}  position={[0.025, -0.9, 1]}/>
+      <primitive object={clonedScene} ref={modelRef} scale={[2.8, 2.2, 2.8]}  position={[0.025, -0.9, 1]}/>
       {/* Wireframe Toggle Button */}
       <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
         <button
