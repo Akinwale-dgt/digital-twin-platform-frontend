@@ -380,7 +380,14 @@ useEffect(() => {
 function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
   if (!data && !cognitive) return null;
 
-  const getColorByNumber = (num) => {
+  const getColorByNumber = (num, percentDiff) => {
+    if (percentDiff) {
+      if (!num && num !== 0) return "grey";
+      if (num > 15) return "red";
+      if (num > 11) return "orange";
+      return "green";
+    }
+
     if (!num && num !== 0) return "#4CAF50";
     if (num > 6) return "#F44336";
     if (num > 3) return "#FF9800";
@@ -509,7 +516,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
                           borderRadius: "3px",
                           color: "white",
                           fontSize: "10px",
-                          backgroundColor: getColorByNumber(value),
+                          backgroundColor: getColorByNumber(value, part === "exertion"),
                         }}
                       >
                         {getRiskLevel(value)}
