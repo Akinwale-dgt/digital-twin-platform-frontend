@@ -382,10 +382,10 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
 
   const getColorByNumber = (num, percentDiff) => {
     if (percentDiff) {
-      if (!num && num !== 0) return "grey";
-      if (num > 15) return "red";
-      if (num > 11) return "orange";
-      return "green";
+      if (!num && num !== 0) return "#4CAF50";
+      if (num > 15) return "#F44336";
+      if (num > 11) return "#FF9800";
+      return "#4CAF50";
     }
 
     if (!num && num !== 0) return "#4CAF50";
