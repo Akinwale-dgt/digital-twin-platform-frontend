@@ -1,46 +1,52 @@
-import * as React from 'react';
-import Head from 'next/head';
-import styles from '../../styles/Home.module.css';
-import { Button, Checkbox, ListItemText, MenuItem, Select } from '@mui/material';
-import ModelViewer from '../components/ModelViewer/Model';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import CircularProgress from '@mui/material/CircularProgress';
-import { marked } from 'marked';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { jsPDF } from 'jspdf';
-import { decode } from 'he';
-import { BASE_URL } from '../env';
+import * as React from "react";
+import Head from "next/head";
+import styles from "../../styles/Home.module.css";
+import {
+  Button,
+  Checkbox,
+  ListItemText,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import ModelViewer from "../components/ModelViewer/Model";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import { useRouter } from "next/router";
+import axios from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
+import { marked } from "marked";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { jsPDF } from "jspdf";
+import { decode } from "he";
+import { BASE_URL } from "../env";
 
 export default function Home() {
   const router = useRouter();
   const [openAnalysis, setAnalysisOpen] = React.useState(false);
-  const [isNewSession, setNewSession] = React.useState('')
+  const [isNewSession, setNewSession] = React.useState("");
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleCloseDialog = () => setAnalysisOpen(false);
 
   const [data, setData] = React.useState({});
   const [loading, setLoading] = React.useState(false);
-  const [reportStatus, setReportStatus] = React.useState('');
+  const [reportStatus, setReportStatus] = React.useState("");
   const [reportData, setReportData] = React.useState({});
   const [polling, setPolling] = React.useState(false);
-  const [html, setHtml] = React.useState('');
+  const [html, setHtml] = React.useState("");
   const hiddenRef = React.useRef(null);
   const [selectedRisks, setSelectedRisks] = React.useState([]);
   const riskOptions = [
-    { label: 'Exo1', value: 1 },
-    { label: 'Exo2', value: 2 },
-    { label: 'Exo3', value: 3 },
+    { label: "Exo1", value: 1 },
+    { label: "Exo2", value: 2 },
+    { label: "Exo3", value: 3 },
   ];
 
-const handleChange = (event) => {
-  setSelectedRisks(event.target.value);
-};
+  const handleChange = (event) => {
+    setSelectedRisks(event.target.value);
+  };
 
   // ✅ Convert markdown to HTML once reportData is loaded
   React.useEffect(() => {
@@ -52,7 +58,7 @@ const handleChange = (event) => {
   React.useEffect(() => {
     axios
       .get(`${BASE_URL}/session-check`, {
-        withCredentials: true, 
+        withCredentials: true,
       })
       .then(
         (response) => {
@@ -64,7 +70,6 @@ const handleChange = (event) => {
         }
       );
   }, [reportData]);
-
 
   const getAnalysisResult = () => {
     setLoading(true);
@@ -83,7 +88,7 @@ const handleChange = (event) => {
       .catch((error) => {
         console.log(error.message);
         toast(error.message, {
-          position: 'top-right',
+          position: "top-right",
         });
       })
       .finally(() => {
@@ -95,22 +100,20 @@ const handleChange = (event) => {
   const pollReportStatus = (reportId, interval = 7000, maxTries = 10) => {
     let attempts = 0;
     setPolling(true);
-    setReportStatus('Analyzing...');
+    setReportStatus("Analyzing...");
 
     const intervalId = setInterval(() => {
       axios
-        .get(
-          `${BASE_URL}/report/${reportId}`
-        )
+        .get(`${BASE_URL}/report/${reportId}`)
         .then((res) => {
           const status = res.data?.status;
           console.log(`Polling attempt ${attempts + 1}:`, status);
           setReportStatus(`Analysing: ${status}`);
 
-          if (status === 'completed') {
+          if (status === "completed") {
             clearInterval(intervalId);
             setPolling(false);
-            setReportStatus('');
+            setReportStatus("");
             setReportData(res.data);
           }
 
@@ -118,15 +121,15 @@ const handleChange = (event) => {
             clearInterval(intervalId);
             setPolling(false);
             setReportStatus(
-              'Could not complete status check after several attempts.'
+              "Could not complete status check after several attempts."
             );
           }
         })
         .catch((err) => {
-          console.error('Polling error:', err.message);
+          console.error("Polling error:", err.message);
           clearInterval(intervalId);
           setPolling(false);
-          setReportStatus('An error occurred while analysing data.');
+          setReportStatus("An error occurred while analysing data.");
         });
     }, interval);
   };
@@ -141,151 +144,120 @@ const handleChange = (event) => {
     router.push(`/subjective-evaluation/${no}`);
   };
 
-  const handleDownload = () => {
-    if (!reportData?.results?.report_markdown) return;
+  const downloadDivContentAsPDF = async () => {
+    const original = document.getElementById("downloadableDiv");
+    if (!original) return;
 
-    const markdown = reportData.results.report_markdown;
+    // Step 1: Clone content into a hidden container
+    const clone = original.cloneNode(true);
 
-    // Convert markdown to HTML, strip tags, decode HTML entities
-    const rawHTML = marked.parse(markdown);
-    const plainText = decode(rawHTML.replace(/<[^>]+>/g, ''));
+    const hiddenContainer = document.createElement("div");
+    hiddenContainer.style.position = "fixed";
+    hiddenContainer.style.top = "0";
+    hiddenContainer.style.left = "0";
+    hiddenContainer.style.width = "800px";
+    hiddenContainer.style.zIndex = "-1";
+    hiddenContainer.style.opacity = "0";
+    hiddenContainer.style.pointerEvents = "none";
+    hiddenContainer.appendChild(clone);
 
-    const doc = new jsPDF();
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-    const maxWidth = 180;
-    let y = margin;
+    // Remove scrolling constraints
+    clone.style.maxHeight = "none";
+    clone.style.overflowY = "visible";
 
-    // Title Page
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-    doc.text('Digital Twin Report', 105, 50, { align: 'center' });
+    document.body.appendChild(hiddenContainer);
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(14);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 65, {
-      align: 'center',
-    });
+    try {
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+      });
 
-    doc.addPage();
-    y = margin;
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    const lines = plainText.split('\n');
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-    lines.forEach((line) => {
-      if (/^#{1,6}\s/.test(line)) {
-        // Heading detection
-        const level = line.match(/^#{1,6}/)[0].length;
-        const text = line.replace(/^#{1,6}\s*/, '');
-        const fontSize = Math.max(20 - level * 2, 10);
-        const wrapped = doc.splitTextToSize(text, maxWidth);
+      const paddingBottom = 10; // Space at bottom
+      const fontSize = 10;
+      let heightLeft = imgHeight;
+      let position = 0;
+      let pageNumber = 1;
 
-        // Only H1 and H2 are bold
-        if (level <= 2) {
-          doc.setFont('helvetica', 'bold');
-        } else {
-          doc.setFont('helvetica', 'normal');
-        }
-        doc.setFontSize(fontSize);
+      // First page
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-        wrapped.forEach((wLine) => {
-          if (y + 10 > pageHeight - margin) {
-            doc.addPage();
-            y = margin;
-          }
-          doc.text(wLine, margin, y);
-          y += 10;
-        });
-      } else if (/\\text{.*?}/.test(line)) {
-        // \text{} handling with basic split
-        const match = line.match(/\\text{(.*?)}/);
-        if (match) {
-          const before = line.split(match[0])[0];
-          const inner = match[1];
-          const after = line.split(match[0])[1];
+      // Divider & Footer
+      pdf.setDrawColor(150);
+      pdf.setLineWidth(0.5);
+      pdf.line(
+        10,
+        pdfHeight - paddingBottom,
+        pdfWidth - 10,
+        pdfHeight - paddingBottom
+      );
+      pdf.setFontSize(fontSize);
+      pdf.text("Continued...", pdfWidth - 30, pdfHeight - 5);
 
-          const wrappedBefore = doc.splitTextToSize(before, maxWidth);
-          const wrappedInner = doc.splitTextToSize(inner, maxWidth);
-          const wrappedAfter = doc.splitTextToSize(after, maxWidth);
+      heightLeft -= pdfHeight - paddingBottom;
 
-          wrappedBefore.forEach((wLine) => {
-            if (y + 10 > pageHeight - margin) {
-              doc.addPage();
-              y = margin;
-            }
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            doc.text(wLine, margin, y);
-            y += 10;
-          });
+      while (heightLeft > 0) {
+        position -= pdfHeight - paddingBottom;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-          wrappedInner.forEach((wLine) => {
-            if (y + 10 > pageHeight - margin) {
-              doc.addPage();
-              y = margin;
-            }
-            doc.setFont('helvetica', 'italic');
-            doc.setFontSize(12);
-            doc.text(wLine, margin, y);
-            y += 10;
-          });
+        // If this is the last page
+        const isLastPage = heightLeft - (pdfHeight - paddingBottom) <= 0;
 
-          wrappedAfter.forEach((wLine) => {
-            if (y + 10 > pageHeight - margin) {
-              doc.addPage();
-              y = margin;
-            }
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            doc.text(wLine, margin, y);
-            y += 10;
-          });
-        } else {
-          const wrapped = doc.splitTextToSize(line, maxWidth);
-          wrapped.forEach((wLine) => {
-            if (y + 10 > pageHeight - margin) {
-              doc.addPage();
-              y = margin;
-            }
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            doc.text(wLine, margin, y);
-            y += 10;
-          });
-        }
-      } else {
-        // Normal paragraph text
-        const wrapped = doc.splitTextToSize(line, maxWidth);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
+        pdf.setDrawColor(150);
+        pdf.setLineWidth(0.5);
+        pdf.line(
+          10,
+          pdfHeight - paddingBottom,
+          pdfWidth - 10,
+          pdfHeight - paddingBottom
+        );
 
-        wrapped.forEach((wLine) => {
-          if (y + 10 > pageHeight - margin) {
-            doc.addPage();
-            y = margin;
-          }
-          doc.text(wLine, margin, y);
-          y += 10;
-        });
+        pdf.setFontSize(fontSize);
+        pdf.text(
+          isLastPage ? "End of Report" : "Continued...",
+          pdfWidth - (isLastPage ? 35 : 30),
+          pdfHeight - 5
+        );
+
+        heightLeft -= pdfHeight - paddingBottom;
+        pageNumber++;
       }
-    });
 
-    // Add Page Numbers
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+      pdf.save("content.pdf");
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      // Clean up
+      document.body.removeChild(hiddenContainer);
     }
-
-    doc.save('report.pdf');
   };
 
   const dummyTwin = [
     {
       exoID: 0,
-      discomfort: { raw_scores: { hand_wrist: 2, upper_arm: 3, shoulder: 1, chest: 2, lower_back: 3, thigh: 2, lower_leg_foot: 2, head: 1, neck: 2 } },
+      discomfort: {
+        raw_scores: {
+          hand_wrist: 2,
+          upper_arm: 3,
+          shoulder: 1,
+          chest: 2,
+          lower_back: 3,
+          thigh: 2,
+          lower_leg_foot: 2,
+          head: 1,
+          neck: 2,
+        },
+      },
       exertion: { raw_scores: 2 },
       cognitive_load: { overall_score: 25 },
     },
@@ -296,13 +268,13 @@ const handleChange = (event) => {
       <div
         ref={hiddenRef}
         style={{
-          position: 'absolute',
-          left: '-9999px',
+          position: "absolute",
+          left: "-9999px",
           top: 0,
-          width: '800px', // You can adjust this
-          padding: '20px',
-          backgroundColor: '#fff',
-          color: '#000',
+          width: "800px", // You can adjust this
+          padding: "20px",
+          backgroundColor: "#fff",
+          color: "#000",
           zIndex: -1,
         }}
       />
@@ -310,20 +282,22 @@ const handleChange = (event) => {
       <div className={styles.container}>
         <Head>
           <title>Exoskeleton Decision-Support Platform</title>
-          <link rel='icon' href='/favicon.ico' />
+          <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <main className={styles.main}>
           <div className={styles.container}>
             <div className={styles.column}>
-              {JSON.stringify(reportData) === '{}' && (
+              {JSON.stringify(reportData) === "{}" && (
                 <>
                   <select
                     onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
                     defaultValue=""
                     className={styles.buttonStyle}
                   >
-                    <option value="" disabled>DATA INPUT</option>
+                    <option value="" disabled>
+                      DATA INPUT
+                    </option>
                     <option value="1">Exo 1</option>
                     <option value="2">Exo 2</option>
                     <option value="3">Exo 3</option>
@@ -332,31 +306,37 @@ const handleChange = (event) => {
                   <h4>{isNewSession}</h4>
                 </>
               )}
-              {JSON.stringify(reportData) !== '{}' && (
+              {JSON.stringify(reportData) !== "{}" && (
                 <div>
                   <div
-                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                    style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <select
-                    onChange={(e) => visitSubjectiveEvaluation(e.target.value)}
-                    defaultValue=""
-                    className={styles.buttonStyle}
-                  >
-                    <option value="" disabled>DATA INPUT</option>
-                    <option value="1">Exo 1</option>
-                    <option value="2">Exo 2</option>
-                    <option value="3">Exo 3</option>
-                  </select>
-                    <Button onClick={handleDownload}>Download Report</Button>
+                      onChange={(e) =>
+                        visitSubjectiveEvaluation(e.target.value)
+                      }
+                      defaultValue=""
+                      className={styles.buttonStyle}
+                    >
+                      <option value="" disabled>
+                        DATA INPUT
+                      </option>
+                      <option value="1">Exo 1</option>
+                      <option value="2">Exo 2</option>
+                      <option value="3">Exo 3</option>
+                    </select>
+                    <Button onClick={downloadDivContentAsPDF}>
+                      Download Report
+                    </Button>
                   </div>
                 </div>
               )}
               {polling || reportStatus ? (
-                <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                <div style={{ marginTop: "1rem", textAlign: "center" }}>
                   {polling && (
                     <CircularProgress
                       size={20}
-                      style={{ marginRight: '0.5rem' }}
+                      style={{ marginRight: "0.5rem" }}
                     />
                   )}
                   <span>{reportStatus}</span>
@@ -365,20 +345,21 @@ const handleChange = (event) => {
 
               {html ? (
                 <div
+                  id="downloadableDiv"
                   style={{
-                    maxHeight: '800px',
-                    overflowY: 'auto',
-                    border: '1px solid #ddd',
-                    padding: '1rem',
-                    marginTop: '1rem',
-                    borderRadius: '8px',
-                    backgroundColor: '#f9f9f9',
-                    textAlign: 'left',
+                    maxHeight: "800px",
+                    overflowY: "auto",
+                    border: "1px solid #ddd",
+                    padding: "1rem",
+                    marginTop: "1rem",
+                    borderRadius: "8px",
+                    backgroundColor: "#f9f9f9",
+                    textAlign: "left",
                   }}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
               ) : (
-                <p style={{ fontStyle: 'italic', marginTop: '1rem' }}>
+                <p style={{ fontStyle: "italic", marginTop: "1rem" }}>
                   Report will appear here after analysis...
                 </p>
               )}
@@ -394,13 +375,16 @@ const handleChange = (event) => {
                   loading ? (
                     <CircularProgress size={20} color="secondary" />
                   ) : selected.length === 0 ? (
-                    'Select Exo'
+                    "Select Exo"
                   ) : (
-                    selected.map((value) => {
-                      const match = riskOptions.find((risk) => risk.value === value);
-                      return match?.label || value;
-                    })
-                    .join(', ')
+                    selected
+                      .map((value) => {
+                        const match = riskOptions.find(
+                          (risk) => risk.value === value
+                        );
+                        return match?.label || value;
+                      })
+                      .join(", ")
                   )
                 }
                 style={{ minWidth: 180 }}
@@ -412,21 +396,23 @@ const handleChange = (event) => {
                   </MenuItem>
                 ))}
               </Select>
-              {!!selectedRisks.length && <Button onClick={getAnalysisResult}>
-                Analyse Risk{' '}
-                {loading && (
-                  <CircularProgress
-                    size={20}
-                    color='secondary'
-                    style={{ marginRight: '0.5rem' }}
-                  />
-                )}
-              </Button>}
-                  {data?.data?.digital_twin && (
-                    <ModelArray twins={data.data.digital_twin} />
+              {!!selectedRisks.length && (
+                <Button onClick={getAnalysisResult}>
+                  Analyse Risk{" "}
+                  {loading && (
+                    <CircularProgress
+                      size={20}
+                      color="secondary"
+                      style={{ marginRight: "0.5rem" }}
+                    />
                   )}
+                </Button>
+              )}
+              {data?.data?.digital_twin && (
+                <ModelArray twins={data.data.digital_twin} />
+              )}
 
-                  {/* {!data?.data?.digital_twin && (
+              {/* {!data?.data?.digital_twin && (
                     <ModelArray
                     twins={data?.data?.digital_twin?.length ? data.data.digital_twin : dummyTwin}
                   />
@@ -495,49 +481,47 @@ const handleChange = (event) => {
   );
 }
 
-
-
 function ModelArray({ twins }) {
   return (
     <>
       <div
-      style={{
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        marginTop: '2rem',
-      }}
-    >
-      {twins.slice(0, 3).map((twin, index) => {
-        const discomfortData = twin.discomfort?.raw_scores;
-        const exertionData = twin.exertion?.raw_scores;
-        const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
-        const cognitiveLevel = (cognitiveWorkload / 120) * 100;
+        style={{
+          display: "flex",
+          gap: "10px",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          marginTop: "2rem",
+        }}
+      >
+        {twins.slice(0, 3).map((twin, index) => {
+          const discomfortData = twin.discomfort?.raw_scores;
+          const exertionData = twin.exertion?.raw_scores;
+          const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
+          const cognitiveLevel = (cognitiveWorkload / 120) * 100;
 
-        return (
-          <div
-            key={twin.exoID ?? index}
-            style={{
-              flex: '1 1 1',
-              minWidth: '250px',
-              maxWidth: '250px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '10px',
-              background: '#fff',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              position: 'relative',
-            }}
-          >
-            <ModelViewer
-              data={{ ...discomfortData, exertion: exertionData }}
-              cognitive
-              cognitiveLevel={cognitiveLevel}
-            />
-          </div>
-        );
-      })}
-    </div>
+          return (
+            <div
+              key={twin.exoID ?? index}
+              style={{
+                flex: "1 1 1",
+                minWidth: "250px",
+                maxWidth: "250px",
+                border: "1px solid #e0e0e0",
+                borderRadius: "10px",
+                background: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                position: "relative",
+              }}
+            >
+              <ModelViewer
+                data={{ ...discomfortData, exertion: exertionData }}
+                cognitive
+                cognitiveLevel={cognitiveLevel}
+              />
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 }
