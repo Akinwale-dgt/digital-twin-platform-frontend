@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { marked } from "marked";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
@@ -147,7 +147,10 @@ export default function Home() {
 
   const downloadDivContentAsPDF = async () => {
     const original = document.getElementById("downloadableDiv");
-    if (!original) return;
+    if (!original) {
+      console.error("Element with ID 'downloadableDiv' not found");
+      return;
+    }
 
     // Step 1: Clone content into a hidden container
     const clone = original.cloneNode(true);
@@ -157,21 +160,43 @@ export default function Home() {
     hiddenContainer.style.top = "0";
     hiddenContainer.style.left = "0";
     hiddenContainer.style.width = "800px";
+    hiddenContainer.style.height = "auto"; // Let it expand naturally
     hiddenContainer.style.zIndex = "-1";
     hiddenContainer.style.opacity = "0";
     hiddenContainer.style.pointerEvents = "none";
+    hiddenContainer.style.backgroundColor = "white";
     hiddenContainer.appendChild(clone);
 
-    // Remove scrolling constraints
+    // Remove scrolling constraints and ensure full content is visible
     clone.style.maxHeight = "none";
     clone.style.overflowY = "visible";
+    clone.style.overflow = "visible";
+    clone.style.height = "auto";
 
     document.body.appendChild(hiddenContainer);
 
     try {
+      // Wait a bit for fonts and styles to load
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const canvas = await html2canvas(clone, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        width: clone.scrollWidth,
+        height: clone.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure the cloned document has all styles applied
+          const clonedElement =
+            clonedDoc.getElementById(clone.id) ||
+            clonedDoc.querySelector("div");
+          if (clonedElement) {
+            clonedElement.style.maxHeight = "none";
+            clonedElement.style.overflow = "visible";
+          }
+        },
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -183,63 +208,94 @@ export default function Home() {
       const imgWidth = pdfWidth;
       const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-      const paddingBottom = 10; // Space at bottom
-      const fontSize = 10;
+      const paddingBottom = 15; // Space at bottom for footer
+      const availableHeight = pdfHeight - paddingBottom;
+      const fontSize = 8;
+
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
 
-      // First page
+      // Add first page
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-      // Divider & Footer
-      pdf.setDrawColor(150);
-      pdf.setLineWidth(0.5);
-      pdf.line(
-        10,
-        pdfHeight - paddingBottom,
-        pdfWidth - 10,
-        pdfHeight - paddingBottom
-      );
-      pdf.setFontSize(fontSize);
-      pdf.text("Continued...", pdfWidth - 30, pdfHeight - 5);
-
-      heightLeft -= pdfHeight - paddingBottom;
-
-      while (heightLeft > 0) {
-        position -= pdfHeight - paddingBottom;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
-        // If this is the last page
-        const isLastPage = heightLeft - (pdfHeight - paddingBottom) <= 0;
-
-        pdf.setDrawColor(150);
-        pdf.setLineWidth(0.5);
+      // Only add footer if there's more content
+      if (heightLeft > availableHeight) {
+        // Add divider line
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.3);
         pdf.line(
           10,
-          pdfHeight - paddingBottom,
+          pdfHeight - paddingBottom + 3,
           pdfWidth - 10,
-          pdfHeight - paddingBottom
+          pdfHeight - paddingBottom + 3
         );
 
+        // Add "Continued..." text
         pdf.setFontSize(fontSize);
-        pdf.text(
-          isLastPage ? "End of Report" : "Continued...",
-          pdfWidth - (isLastPage ? 35 : 30),
-          pdfHeight - 5
-        );
-
-        heightLeft -= pdfHeight - paddingBottom;
-        pageNumber++;
+        pdf.setTextColor(120, 120, 120);
+        pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
       }
 
-      pdf.save("content.pdf");
+      heightLeft -= availableHeight;
+
+      // Add subsequent pages
+      while (heightLeft > 0) {
+        position -= availableHeight;
+        pdf.addPage();
+        pageNumber++;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+
+        // Determine if this is the last page
+        const isLastPage = heightLeft <= availableHeight;
+
+        // Add footer line
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.3);
+        pdf.line(
+          10,
+          pdfHeight - paddingBottom + 3,
+          pdfWidth - 10,
+          pdfHeight - paddingBottom + 3
+        );
+
+        // Add appropriate footer text
+        pdf.setFontSize(fontSize);
+        pdf.setTextColor(120, 120, 120);
+
+        if (isLastPage) {
+          pdf.text("End of Report", pdfWidth - 28, pdfHeight - 3);
+        } else {
+          pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
+        }
+
+        // Add page number (optional)
+        pdf.text(`Page ${pageNumber}`, 10, pdfHeight - 3);
+
+        heightLeft -= availableHeight;
+      }
+
+      // Generate filename with timestamp
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
+      const filename = `exoskeleton-report-${timestamp}.pdf`;
+
+      pdf.save(filename);
+
+      // Show success message
+      console.log("PDF generated successfully");
     } catch (err) {
       console.error("PDF generation failed:", err);
+      // You might want to show a toast notification here
+      // toast.error("Failed to generate PDF. Please try again.");
     } finally {
       // Clean up
-      document.body.removeChild(hiddenContainer);
+      if (document.body.contains(hiddenContainer)) {
+        document.body.removeChild(hiddenContainer);
+      }
     }
   };
 
