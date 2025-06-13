@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { marked } from "marked";
+import html2canvas from 'html2canvas';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
