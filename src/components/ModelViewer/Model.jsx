@@ -608,7 +608,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
 
 const ModelViewer = (props) => {
   const { data, cognitive, cognitiveLevel } = props;
-  const [state, setState] = useState(false);
+  const [state, setState] = useState(true);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
