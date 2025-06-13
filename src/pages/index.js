@@ -406,7 +406,7 @@ export default function Home() {
       const imgWidth = pdfWidth;
       const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-      const paddingBottom = 15;
+      const paddingBottom = 20; // Increased padding to avoid text cutoff
       const availableHeight = pdfHeight - paddingBottom;
 
       let heightLeft = imgHeight;
@@ -419,22 +419,19 @@ export default function Home() {
       // Add first page
       pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
 
-      // Add footer for first page
+      // Add footer for first page - ensure no content overlaps
+      const footerY = Math.min(pdfHeight - 10, pdfHeight - paddingBottom + 8);
+
       pdf.setDrawColor(200, 200, 200);
       pdf.setLineWidth(0.3);
-      pdf.line(
-        10,
-        pdfHeight - paddingBottom + 3,
-        pdfWidth - 10,
-        pdfHeight - paddingBottom + 3
-      );
+      pdf.line(10, footerY - 5, pdfWidth - 10, footerY - 5);
 
       pdf.setFontSize(8);
       pdf.setTextColor(120, 120, 120);
-      pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, pdfHeight - 3);
+      pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, footerY);
 
       if (totalPages > 1) {
-        pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
+        pdf.text("Continued...", pdfWidth - 25, footerY);
       }
 
       heightLeft -= availableHeight;
@@ -449,24 +446,25 @@ export default function Home() {
 
         const isLastPage = heightLeft <= availableHeight;
 
+        // Calculate footer position to avoid content overlap
+        const currentFooterY = Math.min(
+          pdfHeight - 10,
+          pdfHeight - paddingBottom + 8
+        );
+
         // Add footer
         pdf.setDrawColor(200, 200, 200);
         pdf.setLineWidth(0.3);
-        pdf.line(
-          10,
-          pdfHeight - paddingBottom + 3,
-          pdfWidth - 10,
-          pdfHeight - paddingBottom + 3
-        );
+        pdf.line(10, currentFooterY - 5, pdfWidth - 10, currentFooterY - 5);
 
         pdf.setFontSize(8);
         pdf.setTextColor(120, 120, 120);
-        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, pdfHeight - 3);
+        pdf.text(`Page ${pageNumber} of ${totalPages}`, 10, currentFooterY);
 
         if (isLastPage) {
-          pdf.text("End of Report", pdfWidth - 28, pdfHeight - 3);
+          pdf.text("End of Report", pdfWidth - 28, currentFooterY);
         } else {
-          pdf.text("Continued...", pdfWidth - 25, pdfHeight - 3);
+          pdf.text("Continued...", pdfWidth - 25, currentFooterY);
         }
 
         heightLeft -= availableHeight;
