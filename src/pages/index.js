@@ -197,6 +197,11 @@ export default function Home() {
         element.style.borderRadius = "0";
         element.style.boxShadow = "none";
 
+        // Force left alignment for most content
+        if (!element.tagName.match(/^H[1-3]$/)) {
+          element.style.textAlign = "left";
+        }
+
         // Improve typography
         if (element.tagName && element.tagName.match(/^H[1-6]$/)) {
           element.style.marginTop = "25px";
@@ -209,6 +214,12 @@ export default function Home() {
 
           if (element.tagName === "H1") {
             element.style.fontSize = "22px";
+            element.style.textAlign = "center";
+          } else if (element.tagName === "H2") {
+            element.style.fontSize = "18px";
+            element.style.textAlign = "center";
+          } else {
+            element.style.textAlign = "left";
           }
         }
 
@@ -216,6 +227,23 @@ export default function Home() {
           element.style.marginBottom = "12px";
           element.style.lineHeight = "1.6";
           element.style.color = "#000";
+          element.style.textAlign = "left";
+        }
+
+        // Fix list formatting
+        if (element.tagName === "UL" || element.tagName === "OL") {
+          element.style.textAlign = "left";
+          element.style.paddingLeft = "20px";
+          element.style.marginBottom = "15px";
+          element.style.listStylePosition = "outside";
+        }
+
+        if (element.tagName === "LI") {
+          element.style.textAlign = "left";
+          element.style.marginBottom = "8px";
+          element.style.lineHeight = "1.5";
+          element.style.listStyleType = "disc";
+          element.style.paddingLeft = "5px";
         }
 
         // Improve table styling
@@ -224,6 +252,7 @@ export default function Home() {
           element.style.borderCollapse = "collapse";
           element.style.marginBottom = "20px";
           element.style.backgroundColor = "transparent";
+          element.style.textAlign = "left";
         }
 
         if (element.tagName === "TD" || element.tagName === "TH") {
@@ -232,6 +261,12 @@ export default function Home() {
           element.style.textAlign = "left";
           element.style.backgroundColor =
             element.tagName === "TH" ? "#f5f5f5" : "transparent";
+          element.style.verticalAlign = "top";
+        }
+
+        // Fix any div containers
+        if (element.tagName === "DIV") {
+          element.style.textAlign = "left";
         }
 
         // Process child elements
@@ -290,25 +325,55 @@ export default function Home() {
             margin: 0 !important; 
             padding: 0 !important;
             background: white !important;
+            text-align: left !important;
           }
-          h1, h2, h3, h4, h5, h6 { 
+          h1, h2 { 
             word-spacing: normal !important; 
             letter-spacing: normal !important;
             line-height: 1.3 !important;
             margin-top: 25px !important;
             margin-bottom: 15px !important;
+            text-align: center !important;
+          }
+          h3, h4, h5, h6 {
+            word-spacing: normal !important; 
+            letter-spacing: normal !important;
+            line-height: 1.3 !important;
+            margin-top: 25px !important;
+            margin-bottom: 15px !important;
+            text-align: left !important;
           }
           p {
             line-height: 1.6 !important;
             margin-bottom: 12px !important;
+            text-align: left !important;
+          }
+          div {
+            text-align: left !important;
+          }
+          ul, ol { 
+            text-align: left !important;
+            padding-left: 20px !important;
+            margin-bottom: 15px !important;
+            list-style-position: outside !important;
+          }
+          li {
+            text-align: left !important;
+            margin-bottom: 8px !important;
+            line-height: 1.5 !important;
+            list-style-type: disc !important;
+            padding-left: 5px !important;
           }
           table { 
             border-collapse: collapse !important; 
             width: 100% !important;
+            text-align: left !important;
           }
           td, th { 
             padding: 8px !important; 
             border: 1px solid #ddd !important; 
+            text-align: left !important;
+            vertical-align: top !important;
           }
           th {
             background-color: #f5f5f5 !important;
