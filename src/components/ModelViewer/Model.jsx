@@ -526,7 +526,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
                           backgroundColor: getColorByNumber(value, part === "exertion"),
                         }}
                       >
-                        {getRiskLevel(value)}
+                        {getRiskLevel(value, part === "exertion")}
                       </span>
                     </div>
                   </div>
