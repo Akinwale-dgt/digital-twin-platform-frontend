@@ -556,7 +556,7 @@ export default function Home() {
                     <option value="3">Exo 3</option>
                   </select>
 
-                  {/*<h4>{isNewSession}</h4>*/}
+                  {/* <h4>{isNewSession}</h4> */}
                 </>
               )}
               {JSON.stringify(reportData) !== "{}" && (
