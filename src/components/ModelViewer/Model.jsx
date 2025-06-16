@@ -10,7 +10,7 @@ function Model(props) {
   const [hoveredPart, setHoveredPart] = useState(null);
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
-  const [wireframeMode, setWireframeMode] = useState(true); // Enable wireframe by default
+  const [wireframeMode, setWireframeMode] = useState(false); // Enable wireframe by default
 
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
@@ -608,7 +608,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
 
 const ModelViewer = (props) => {
   const { data, cognitive, cognitiveLevel } = props;
-  const [state, setState] = useState(false);
+  const [state, setState] = useState(true);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
