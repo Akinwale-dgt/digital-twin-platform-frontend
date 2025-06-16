@@ -30,6 +30,7 @@ export default function Home() {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleCloseDialog = () => setAnalysisOpen(false);
+  const [selectOpen, setSelectOpen] = React.useState(false);
 
   const [data, setData] = React.useState({});
   const [loading, setLoading] = React.useState(false);
@@ -555,7 +556,7 @@ export default function Home() {
                     <option value="3">Exo 3</option>
                   </select>
 
-                  <h4>{isNewSession}</h4>
+                  {/*<h4>{isNewSession}</h4>*/}
                 </>
               )}
               {JSON.stringify(reportData) !== "{}" && (
@@ -621,6 +622,9 @@ export default function Home() {
             <div className={styles.column}>
               <Select
                 multiple
+                open={selectOpen}
+                onOpen={() => setSelectOpen(true)}
+                onClose={() => setSelectOpen(false)}
                 value={selectedRisks}
                 onChange={handleChange}
                 displayEmpty
@@ -648,8 +652,31 @@ export default function Home() {
                     <ListItemText primary={risk.label} />
                   </MenuItem>
                 ))}
+                <Button
+                  variant="secondary"
+                  color="secondary"
+                  onClick={() => {
+                    // Close select first if open
+                    if (selectOpen) {
+                      setSelectOpen(false);
+                    }
+                    // Small delay to ensure select closes
+                    setTimeout(() => {
+                      getAnalysisResult();
+                    }, 100);
+                  }}
+                >
+                  Analyse Risk{" "}
+                  {loading && (
+                    <CircularProgress
+                      size={20}
+                      color="secondary"
+                      style={{ marginRight: "0.5rem" }}
+                    />
+                  )}
+                </Button>
               </Select>
-              {!!selectedRisks.length && (
+              {!selectOpen && !!selectedRisks.length && (
                 <Button onClick={getAnalysisResult}>
                   Analyse Risk{" "}
                   {loading && (
