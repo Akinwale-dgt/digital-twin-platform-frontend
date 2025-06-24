@@ -74,10 +74,8 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
     answers.forEach((val, i) => {
       const [_, __, key1, key2] = QUESTION_LABELS[i];
       const forwardKey = `${key1}_${key2}`;
-      const reverseKey = `${key2}_${key1}`;
       const num = parseFloat(val);
       result[forwardKey] = num;
-      result[reverseKey] = parseFloat((1 / num).toFixed(4));
     });
 
     onSubmit(result);
