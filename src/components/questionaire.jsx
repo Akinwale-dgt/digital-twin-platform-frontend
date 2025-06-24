@@ -8,7 +8,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   Typography,
   Box,
 } from "@mui/material";
@@ -47,7 +46,6 @@ const RATING_OPTIONS = [
   { label: "Very Strong (7)", value: 7 },
   { label: "Very, Very Strong (8)", value: 8 },
   { label: "Extreme Importance (9)", value: 9 },
-
   { label: "Weak Slight (1/2)", value: 1 / 2 },
   { label: "Moderate Importance (1/3)", value: 1 / 3 },
   { label: "Moderate Plus (1/4)", value: 1 / 4 },
@@ -101,10 +99,12 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
             (1 = Equal, 9 = Extremely more important). If the second is more important, choose a fractional value (e.g., 1/3).
           </i>
         </Typography>
-        <Box display="flex" flexDirection="column" gap={2} mt={2}>
+        <Box display="flex" flexDirection="column" gap={3} mt={2}>
           {QUESTION_LABELS.map(([label1, label2, key1, key2], index) => (
             <FormControl key={index} fullWidth>
-              <InputLabel shrink>{`Q${index + 1}: ${label1} (${key1}) vs ${label2} (${key2})`}</InputLabel>
+              <Typography fontWeight="bold" gutterBottom>
+                Q{index + 1}: {label1} ({key1}) vs {label2} ({key2})
+              </Typography>
               <Select
                 value={answers[index]}
                 onChange={handleChange(index)}
@@ -115,7 +115,12 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
                     key={optIndex}
                     value={option.value.toString()}
                   >
-                    {`${option.label} — (${option.value > 1 ? key1 + " over " + key2 : option.value < 1 ? key2 + " over " + key1 : "Equal"})`}
+                    {`${option.label} — (${option.value > 1
+                      ? `${key1} over ${key2}`
+                      : option.value < 1
+                      ? `${key2} over ${key1}`
+                      : "Equal"
+                    })`}
                   </MenuItem>
                 ))}
               </Select>
