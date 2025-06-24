@@ -21,6 +21,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
 import { decode } from "he";
 import { BASE_URL } from "../env";
+import QuestionnaireModal from "../components/questionaire";
 
 export default function Home() {
   const router = useRouter();
@@ -45,6 +46,17 @@ export default function Home() {
     { label: "Exo2", value: 2 },
     { label: "Exo3", value: 3 },
   ];
+
+  const [showQuestionnaire, setShowQuestionnaire] = React.useState(false);
+
+  const handleStartAnalysis = () => {
+    setShowQuestionnaire(true);
+  };
+
+  const handleQuestionnaireSubmit = (answers) => {
+    setShowQuestionnaire(false);
+    submitAnalysisResult(answers);
+  };
 
   const handleChange = (event) => {
     setSelectedRisks(event.target.value);
@@ -73,11 +85,11 @@ export default function Home() {
       );
   }, [reportData]);
 
-  const getAnalysisResult = () => {
+  const submitAnalysisResult = (payload) => {
     setLoading(true);
 
     axios
-      .get(`${BASE_URL}/analyze-data`)
+      .post(`${BASE_URL}/analyze-data`, payload, { withCredentials: true})
       .then((response) => {
         const data = response.data;
         setData(data);
@@ -556,7 +568,7 @@ export default function Home() {
                     <option value="3">Exo 3</option>
                   </select>
 
-                  {/*<h4>{isNewSession}</h4>*/}
+                  {/* <h4>{isNewSession}</h4> */}
                 </>
               )}
               {JSON.stringify(reportData) !== "{}" && (
@@ -652,20 +664,7 @@ export default function Home() {
                     <ListItemText primary={risk.label} />
                   </MenuItem>
                 ))}
-                <Button
-                  variant="secondary"
-                  color="secondary"
-                  onClick={() => {
-                    // Close select first if open
-                    if (selectOpen) {
-                      setSelectOpen(false);
-                    }
-                    // Small delay to ensure select closes
-                    setTimeout(() => {
-                      getAnalysisResult();
-                    }, 100);
-                  }}
-                >
+                <Button onClick={handleStartAnalysis}>
                   Analyse Risk{" "}
                   {loading && (
                     <CircularProgress
@@ -677,7 +676,7 @@ export default function Home() {
                 </Button>
               </Select>
               {!selectOpen && !!selectedRisks.length && (
-                <Button onClick={getAnalysisResult}>
+                <Button onClick={handleStartAnalysis}>
                   Analyse Risk{" "}
                   {loading && (
                     <CircularProgress
@@ -686,7 +685,7 @@ export default function Home() {
                       style={{ marginRight: "0.5rem" }}
                     />
                   )}
-                </Button>
+              </Button>
               )}
               {data?.data?.digital_twin && (
                 <ModelArray twins={data.data.digital_twin} />
@@ -757,6 +756,12 @@ export default function Home() {
           }
         `}</style>
       </div>
+
+      <QuestionnaireModal
+        open={showQuestionnaire}
+        onClose={() => setShowQuestionnaire(false)}
+        onSubmit={handleQuestionnaireSubmit}
+      />
     </>
   );
 }
