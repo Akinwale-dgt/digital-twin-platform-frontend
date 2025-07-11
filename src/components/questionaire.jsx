@@ -57,7 +57,9 @@ const RATING_OPTIONS = [
 ];
 
 const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
-  const [answers, setAnswers] = React.useState(Array(QUESTION_LABELS.length).fill(""));
+  const [answers, setAnswers] = React.useState(
+    Array(QUESTION_LABELS.length).fill("")
+  );
 
   const isValid = answers.every((a) => a !== "");
 
@@ -93,8 +95,10 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
       <DialogContent dividers>
         <Typography variant="body2" gutterBottom>
           <i>
-            For each question, rate how much more important the first criterion is compared to the second. 
-            (1 = Equal, 9 = Extremely more important). If the second is more important, choose a fractional value (e.g., 1/3).
+            For each question, rate how much more important the first criterion
+            is compared to the second. (1 = Equal, 9 = Extremely more
+            important). If the second is more important, choose a fractional
+            value (e.g., 1/3).
           </i>
         </Typography>
         <Box display="flex" flexDirection="column" gap={3} mt={2}>
@@ -109,15 +113,13 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
                 displayEmpty
               >
                 {RATING_OPTIONS.map((option, optIndex) => (
-                  <MenuItem
-                    key={optIndex}
-                    value={option.value.toString()}
-                  >
-                    {`${option.label} — (${option.value > 1
-                      ? `${key1} over ${key2}`
-                      : option.value < 1
-                      ? `${key2} over ${key1}`
-                      : "Equal"
+                  <MenuItem key={optIndex} value={option.value.toString()}>
+                    {`${option.label} — (${
+                      option.value > 1
+                        ? `${key1} over ${key2}`
+                        : option.value < 1
+                        ? `${key2} over ${key1}`
+                        : "Equal"
                     })`}
                   </MenuItem>
                 ))}

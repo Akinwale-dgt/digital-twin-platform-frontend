@@ -162,7 +162,7 @@ export default function Header() {
           <Toolbar>
             <Button onClick={goHome} color="inherit" style={{marginRight: '40%'}}>Home</Button>
             <h1 style={{textAlign: 'center', display: 'contents'}}>
-              Exoskeleton Decision-Support Platform
+              ExoSelect Guide
             </h1>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
