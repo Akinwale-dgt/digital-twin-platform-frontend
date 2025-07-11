@@ -15,13 +15,13 @@ function Model(props) {
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
 
-  // Calculate tilt angle based on stability (0 = max tilt, 1 = no tilt)
+  // Calculate tilt angle based on stability (0 = no tilt/steady, 1 = max tilt/unsteady)
   const getTiltAngle = (stability) => {
     // Clamp stability between 0 and 1
     const clampedStability = Math.max(0, Math.min(1, stability));
-    // Convert to tilt angle: 0 stability = 30 degrees forward, 1 stability = 0 degrees
+    // Convert to tilt angle: 0 stability = 0 degrees (steady), 1 stability = 30 degrees forward (unsteady)
     const maxTiltAngle = Math.PI / 6; // 30 degrees in radians
-    return maxTiltAngle * (1 - clampedStability);
+    return maxTiltAngle * clampedStability;
   };
 
   // Color mapping functions
@@ -330,7 +330,7 @@ function Model(props) {
           }}
         >
           <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
-            Stability: {(stability * 100).toFixed(1)}%
+            Instability: {(stability * 100).toFixed(1)}%
           </div>
           <div style={{ fontSize: "10px", opacity: 0.8 }}>
             Tilt: {(getTiltAngle(stability) * 180 / Math.PI).toFixed(1)}°
@@ -405,9 +405,9 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
   };
 
   const getStabilityColor = (stability) => {
-    if (stability >= 0.8) return "#4CAF50";
-    if (stability >= 0.5) return "#FF9800";
-    return "#F44336";
+    if (stability <= 0.2) return "#4CAF50"; // Low instability (steady)
+    if (stability <= 0.5) return "#FF9800"; // Moderate instability
+    return "#F44336"; // High instability (unsteady)
   };
 
   return (
@@ -451,7 +451,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 fontWeight: "600",
               }}
             >
-              Postural Stability
+              Postural Instability
             </h4>
             <div
               style={{
@@ -470,7 +470,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                   backgroundColor: getStabilityColor(stability),
                 }}
               >
-                {stability >= 0.8 ? "Good" : stability >= 0.5 ? "Moderate" : "Poor"}
+                {stability <= 0.2 ? "Steady" : stability <= 0.5 ? "Moderate" : "Unsteady"}
               </span>
             </div>
           </div>
