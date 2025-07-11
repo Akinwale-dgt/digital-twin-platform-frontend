@@ -36,12 +36,6 @@ const QUESTION_LABELS = [
   ["Productivity", "Comfort", "C6", "C7"],
 ];
 
-const defaultAnswers = [
-  8, 0.3333333333333333, 0.2, 0.2, 0.14285714285714285, 0.5, 0.2,
-  0.14285714285714285, 8, 4, 0.2, 0.125, 7, 3, 0.16666666666666666,
-  0.14285714285714285, 0.14285714285714285, 7, 8, 6, 5,
-];
-
 const RATING_OPTIONS = [
   { label: "Equal Importance (1)", value: 1 },
   { label: "Weak Slight (2)", value: 2 },
@@ -90,11 +84,6 @@ const QuestionnaireModal = ({ open, onClose, onSubmit }) => {
   };
 
   React.useEffect(() => {
-    if (defaultAnswers && defaultAnswers.length) {
-      setAnswers(defaultAnswers)
-      return;
-    }
-
     if (open) setAnswers(Array(QUESTION_LABELS.length).fill(""));
   }, [open]);
 

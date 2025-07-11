@@ -25,7 +25,7 @@ function Model(props) {
     } else {
       // Map 0.5-1 range to 0-15 degrees
       const instabilityLevel = (clampedStability - 0.5) / 0.5; // Convert to 0-1 range
-      const maxTiltAngle = Math.PI / 12; // 15 degrees in radians
+      const maxTiltAngle = Math.PI / 24; // 5 degrees in radians
       return maxTiltAngle * instabilityLevel;
     }
   };
@@ -59,6 +59,7 @@ function Model(props) {
   };
 
   const getCognitiveColor = (num) => {
+    if (!num && num !== 0) return "grey";
     if (num >= 70) return "red";
     if (num >= 31) return "orange";
     return "green";
@@ -124,7 +125,6 @@ function Model(props) {
         // COGNITIVE LOAD -> BRAIN ONLY (not whole head)
         if (
           meshName.includes("brain") &&
-          cognitive &&
           cognitiveLevel !== undefined
         ) {
           targetColor = getThreeColor(getCognitiveColor(cognitiveLevel));
@@ -132,7 +132,7 @@ function Model(props) {
           dataValue = cognitiveLevel;
         }
         // EXERTION -> HEART ONLY
-        else if (meshName.includes("heart") && data?.exertion !== undefined) {
+         else if (meshName.includes("heart") && data?.exertion !== undefined) {
           targetColor = getThreeColor(getColorByNumber(data.exertion, "20%"));
           bodyPart = "heart (exertion)";
           dataValue = data.exertion;
@@ -238,7 +238,7 @@ function Model(props) {
           ) {
             targetColor = getThreeColor(getColorByNumber(data.head));
             bodyPart = "head";
-            dataValue = data.neck;
+            dataValue = data.head;
           }
           // Check for neck meshes
           else if (
@@ -323,7 +323,7 @@ function Model(props) {
       </Html>
 
       {/* Stability Indicator */}
-      <Html position={[1.5, -1.5, 1]} style={{ pointerEvents: "none" }}>
+      {/* <Html position={[1.5, -1.5, 1]} style={{ pointerEvents: "none" }}>
         <div
           style={{
             background: "rgba(0,0,0,0.8)",
@@ -336,13 +336,13 @@ function Model(props) {
           }}
         >
           <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
-            Instability: {(stability * 100).toFixed(1)}%
+            Stability: {(1 - stability * 100).toFixed(1)}%
           </div>
           <div style={{ fontSize: "10px", opacity: 0.8 }}>
             Tilt: {(getTiltAngle(stability) * 180 / Math.PI).toFixed(1)}°
           </div>
         </div>
-      </Html>
+      </Html> */}
 
       {/* Hover tooltip */}
       {hoveredPart && (
@@ -411,9 +411,8 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
   };
 
   const getStabilityColor = (stability) => {
-    if (stability <= 0.5) return "#4CAF50"; // Stable range
-    if (stability <= 0.75) return "#FF9800"; // Moderate instability
-    return "#F44336"; // High instability
+    if (stability < 0.5) return "#4CAF50"; // Good/Stable (50-100%)
+    return "#F44336"; // Poor/Unstable (0-49%)
   };
 
   return (
@@ -447,7 +446,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
           Digital Twin Analysis
         </h3>
 
-        {/* Stability Section */}
+        {/* Stability/Instability Section */}
         {stability !== undefined && (
           <div style={{ marginBottom: "12px" }}>
             <h4
@@ -457,7 +456,8 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 fontWeight: "600",
               }}
             >
-              Postural Instability
+              {/* {stability <= 0.5 ? "Postural Stability" : "Postural Instability"} */}
+              Postural Stability
             </h4>
             <div
               style={{
@@ -466,7 +466,12 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 alignItems: "center",
               }}
             >
-              <span>Level: {(stability * 100).toFixed(1)}%</span>
+              <span>Level: {((1 - stability) * 100).toFixed(1)}%</span>
+              {/* {stability <= 0.5 ? (
+                <span>Level: {((0.5 - stability) / 0.5 * 100).toFixed(1)}%</span>
+               ) : ( 
+                  <span>Level: {((stability - 0.5) / 0.5 * 100).toFixed(1)}%</span> 
+                )}  */}
               <span
                 style={{
                   padding: "2px 8px",
@@ -476,7 +481,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                   backgroundColor: getStabilityColor(stability),
                 }}
               >
-                {stability <= 0.5 ? "Stable" : stability <= 0.75 ? "Moderate" : "Unstable"}
+                {stability >= 0.5 ? "Unstable" : "Stable"}
               </span>
             </div>
           </div>
@@ -525,9 +530,10 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
             </div>
           </div>
         )}
-
+        {/* Exertion Analysis Panel */}
+        
         {data && (
-          <div>
+          <div style={{ marginBottom: "12px" }}>
             <h4
               style={{
                 margin: "0 0 8px 0",
@@ -535,11 +541,11 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 fontWeight: "600",
               }}
             >
-              Body Part Discomfort
+              Exertion
             </h4>
             <div style={{ display: "grid", gap: "4px" }}>
               {Object.entries(data)
-                .filter(([part, value]) => !["shoulder"].includes(part))
+                .filter(([part, value]) => ["exertion"].includes(part))
                 .map(([part, value]) => (
                   <div
                     key={part}
@@ -568,6 +574,64 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                           color: "white",
                           fontSize: "10px",
                           backgroundColor: getColorByNumber(value, part === "exertion"),
+                        }}
+                      >
+                        {getRiskLevel(value, part === "exertion")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {data && (
+          <div>
+            <h4
+              style={{
+                margin: "0 0 8px 0",
+                fontSize: "14px",
+                fontWeight: "600",
+              }}
+            >
+              Body Part Discomfort
+            </h4>
+            <div style={{ display: "grid", gap: "4px" }}>
+              {Object.entries(data)
+                .filter(
+                  ([part, value]) => !["shoulder", "exertion"].includes(part)
+                )
+                .map(([part, value]) => (
+                  <div
+                    key={part}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontSize: "12px",
+                    }}
+                  >
+                    <span style={{ textTransform: "capitalize" }}>
+                      {part.replace("_", " ")}:
+                    </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>{value?.toFixed(1)}</span>
+                      <span
+                        style={{
+                          padding: "1px 6px",
+                          borderRadius: "3px",
+                          color: "white",
+                          fontSize: "10px",
+                          backgroundColor: getColorByNumber(
+                            value,
+                            part === "exertion"
+                          ),
                         }}
                       >
                         {getRiskLevel(value, part === "exertion")}
