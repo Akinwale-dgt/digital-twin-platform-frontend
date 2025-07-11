@@ -1,19 +1,34 @@
 import React, { Suspense, useRef, useState, useEffect, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
 function Model(props) {
-  const { data, cognitive, cognitiveLevel } = props.props;
+  const { data, cognitive, cognitiveLevel, stability = 0 } = props; // Default stability to 1 (no tilt)
   const [hoveredPart, setHoveredPart] = useState(null);
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
-  const [wireframeMode, setWireframeMode] = useState(false); // Enable wireframe by default
+  const [wireframeMode, setWireframeMode] = useState(false);
 
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
+
+  // Calculate tilt angle based on stability (0-0.5 = stable, 0.5-1 = unstable)
+  const getTiltAngle = (stability) => {
+    // Clamp stability between 0 and 1
+    const clampedStability = Math.max(0, Math.min(1, stability));
+    // No tilt for stable range (0-0.5), gradual tilt for unstable range (0.5-1)
+    if (clampedStability <= 0.5) {
+      return 0; // No tilt for stable range
+    } else {
+      // Map 0.5-1 range to 0-15 degrees
+      const instabilityLevel = (clampedStability - 0.5) / 0.5; // Convert to 0-1 range
+      const maxTiltAngle = Math.PI / 24; // 5 degrees in radians
+      return maxTiltAngle * instabilityLevel;
+    }
+  };
 
   // Color mapping functions
   const getColorByNumber = (num, percentDiff) => {
@@ -44,6 +59,7 @@ function Model(props) {
   };
 
   const getCognitiveColor = (num) => {
+    if (!num && num !== 0) return "grey";
     if (num >= 70) return "red";
     if (num >= 31) return "orange";
     return "green";
@@ -52,80 +68,54 @@ function Model(props) {
   const gltf = useLoader(GLTFLoader, "/images/DT.glb");
 
   const clonedScene = useMemo(() => {
-  const clone = gltf.scene.clone(true);
+    const clone = gltf.scene.clone(true);
 
-  clone.traverse((node) => {
-    if (node.isMesh) {
-      node.geometry = node.geometry.clone();
-      node.material = node.material.clone();
-      node.material.needsUpdate = true;
+    clone.traverse((node) => {
+      if (node.isMesh) {
+        node.geometry = node.geometry.clone();
+        node.material = node.material.clone();
+        node.material.needsUpdate = true;
+      }
+    });
+
+    return clone;
+  }, [gltf]);
+
+  useEffect(() => {
+    if (!clonedScene) return;
+
+    const nodes = {};
+    const meshes = [];
+
+    clonedScene.traverse((child) => {
+      if (child.name && child.name.trim() !== "") {
+        nodes[child.name.toLowerCase()] = child;
+      }
+
+      if (child.isMesh) {
+        meshes.push(child);
+        originalMaterials.current.set(child.uuid, child.material.clone());
+      }
+    });
+
+    setModelNodes(nodes);
+    setAllMeshes(meshes);
+  }, [clonedScene]);
+
+  // Apply tilt based on stability
+  useEffect(() => {
+    if (modelRef.current && stability !== undefined) {
+      const tiltAngle = getTiltAngle(stability);
+      modelRef.current.rotation.x = tiltAngle;
+      
+      // Optional: Add a slight Y-axis adjustment for more realistic posture
+      // modelRef.current.rotation.y = tiltAngle * 0.1; // Slight side lean
     }
-  });
-
-  return clone;
-}, [gltf]);
-
-useEffect(() => {
-  if (!clonedScene) return;
-
-  const nodes = {};
-  const meshes = [];
-
-  clonedScene.traverse((child) => {
-    if (child.name && child.name.trim() !== "") {
-      nodes[child.name.toLowerCase()] = child;
-    }
-
-    if (child.isMesh) {
-      meshes.push(child);
-      originalMaterials.current.set(child.uuid, child.material.clone());
-    }
-  });
-
-  setModelNodes(nodes);
-  setAllMeshes(meshes);
-}, [clonedScene]);
-
-  // Scan model for nodes and meshes when it loads
-  // useEffect(() => {
-  //   if (gltf.scene) {
-  //     const nodes = {};
-  //     const meshes = [];
-
-  //     console.log("🔍 Scanning GLB model for all nodes and meshes:");
-
-  //     gltf.scene.traverse((child) => {
-  //       // Store all named nodes
-  //       if (child.name && child.name.trim() !== "") {
-  //         nodes[child.name.toLowerCase()] = child;
-  //         console.log(
-  //           `📦 Found node: "${child.name}" at position:`,
-  //           child.position
-  //         );
-  //       }
-
-  //       // Store all meshes and their materials
-  //       if (child.isMesh) {
-  //         meshes.push(child);
-  //         originalMaterials.current.set(child.uuid, child.material.clone());
-  //         console.log(
-  //           `🎨 Found mesh: "${child.name}" | Material: ${child.material.type}`
-  //         );
-  //       }
-  //     });
-
-  //     setModelNodes(nodes);
-  //     setAllMeshes(meshes);
-  //     console.log("✅ Scanning complete. Nodes:", Object.keys(nodes));
-  //     console.log("✅ Total meshes found:", meshes.length);
-  //   }
-  // }, [gltf]);
+  }, [stability]);
 
   // Apply color changes to actual model materials
   useEffect(() => {
     if (allMeshes.length > 0 && (data || cognitive || cognitiveLevel)) {
-
-      // Try to find and color specific meshes based on your actual GLB mesh names
       allMeshes.forEach((mesh) => {
         const meshName = mesh.name.toLowerCase();
         let targetColor = null;
@@ -135,7 +125,6 @@ useEffect(() => {
         // COGNITIVE LOAD -> BRAIN ONLY (not whole head)
         if (
           meshName.includes("brain") &&
-          cognitive &&
           cognitiveLevel !== undefined
         ) {
           targetColor = getThreeColor(getCognitiveColor(cognitiveLevel));
@@ -143,14 +132,14 @@ useEffect(() => {
           dataValue = cognitiveLevel;
         }
         // EXERTION -> HEART ONLY
-        else if (meshName.includes("heart") && data?.exertion !== undefined) {
+         else if (meshName.includes("heart") && data?.exertion !== undefined) {
           targetColor = getThreeColor(getColorByNumber(data.exertion, "20%"));
           bodyPart = "heart (exertion)";
           dataValue = data.exertion;
         }
         // DISCOMFORT DATA -> BODY PARTS
         else if (data) {
-          // Check for hand/wrist meshes (hand1, hand2, hand1.001, hand2.001)
+          // Check for hand/wrist meshes
           if (
             (meshName.includes("hand") ||
               meshName.includes("wrist") ||
@@ -161,7 +150,7 @@ useEffect(() => {
             bodyPart = "hand_wrist";
             dataValue = data.hand_wrist;
           }
-          // Check for upper arm meshes (Upperhand L, Upper handR, upperarm) - UPPER ARM ONLY
+          // Check for upper arm meshes
           else if (
             meshName.includes("upper") &&
             (meshName.includes("hand") ||
@@ -172,7 +161,7 @@ useEffect(() => {
             bodyPart = "upper_arm";
             dataValue = data.upper_arm;
           }
-          // Check for general arm meshes (fallback for arm parts that don't include 'upper' or 'hand')
+          // Check for general arm meshes
           else if (
             meshName.includes("arm") &&
             !meshName.includes("upper") &&
@@ -192,7 +181,7 @@ useEffect(() => {
             bodyPart = "shoulder";
             dataValue = data.shoulder;
           }
-          // Check for chest/torso meshes (body, Body1 - but exclude back and heart)
+          // Check for chest/torso meshes
           else if (
             (meshName.includes("chest") ||
               meshName.includes("torso") ||
@@ -204,7 +193,7 @@ useEffect(() => {
             bodyPart = "chest";
             dataValue = data.chest;
           }
-          // Check for back/spine meshes (Back_lp.001, back)
+          // Check for back/spine meshes
           else if (
             meshName.includes("back") ||
             meshName.includes("spine") ||
@@ -214,7 +203,7 @@ useEffect(() => {
             bodyPart = "lower_back";
             dataValue = data.lower_back;
           }
-          // Check for thigh/upper leg meshes (leg1, leg2 - but exclude lower leg)
+          // Check for thigh/upper leg meshes
           else if (
             (meshName.includes("leg") ||
               meshName.includes("thigh") ||
@@ -225,7 +214,7 @@ useEffect(() => {
             bodyPart = "thigh";
             dataValue = data.thigh;
           }
-          // Check for lower leg meshes (Lower-leg R, Lowerleg L, lower)
+          // Check for lower leg meshes
           else if (
             meshName.includes("lower") &&
             (meshName.includes("leg") ||
@@ -242,22 +231,16 @@ useEffect(() => {
             bodyPart = "lower_leg_foot";
             dataValue = data.lower_leg_foot;
           }
-          // Check for head/neck meshes (head, head.001 - but NOT brain)
-          // else if ((meshName.includes('head') || meshName.includes('neck')) && !meshName.includes('brain')) {
-          //   targetColor = getThreeColor(getColorByNumber(data.neck));
-          //   bodyPart = 'neck';
-          //   dataValue = data.neck;
-          // }
-          // Check for head/neck meshes (head, head.001 - but NOT brain)
+          // Check for head meshes
           else if (
             meshName.includes("head") &&
             (!meshName.includes("neck") || !meshName.includes("brain"))
           ) {
             targetColor = getThreeColor(getColorByNumber(data.head));
             bodyPart = "head";
-            dataValue = data.neck;
+            dataValue = data.head;
           }
-          // Check for head/neck meshes (head, head.001 - but NOT brain)
+          // Check for neck meshes
           else if (
             meshName.includes("neck") &&
             !meshName.includes("head") &&
@@ -276,22 +259,13 @@ useEffect(() => {
             mesh.material = originalMaterial.clone();
             mesh.material.color = targetColor;
             mesh.material.emissive = targetColor.clone().multiplyScalar(0.1);
-
-            // Apply wireframe mode for better visibility of internal organs
             mesh.material.wireframe = wireframeMode;
-
-            // Adjust opacity for better internal organ visibility
             mesh.material.transparent = true;
             mesh.material.opacity = wireframeMode ? 1.0 : 0.8;
-
             mesh.material.needsUpdate = true;
 
             console.log(
-              `✅ Colored mesh "${
-                mesh.name
-              }" as ${bodyPart} with value ${dataValue} (${
-                getColorByNumber(dataValue) + getCognitiveColor(dataValue)
-              }) color`
+              `✅ Colored mesh "${mesh.name}" as ${bodyPart} with value ${dataValue}`
             );
           }
         } else {
@@ -301,13 +275,13 @@ useEffect(() => {
             mesh.material = originalMaterial.clone();
             mesh.material.wireframe = wireframeMode;
             mesh.material.transparent = true;
-            mesh.material.opacity = 0.3; // Lower opacity for unmapped parts
+            mesh.material.opacity = 0.3;
             mesh.material.needsUpdate = true;
           }
         }
       });
     }
-  }, [allMeshes, data, cognitive, cognitiveLevel, wireframeMode]); // Add wireframeMode dependency
+  }, [allMeshes, data, cognitive, cognitiveLevel, wireframeMode]);
 
   // Toggle wireframe mode
   const toggleWireframe = () => {
@@ -316,7 +290,13 @@ useEffect(() => {
 
   return (
     <>
-      <primitive object={clonedScene} ref={modelRef} scale={[9, 7, 9]}  position={[0.025, -0.9, 1]}/>
+      <primitive 
+        object={clonedScene} 
+        ref={modelRef} 
+        scale={[9, 7, 9]}  
+        position={[0.025, -0.9, 1]}
+      />
+      
       {/* Wireframe Toggle Button */}
       <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
         <button
@@ -341,6 +321,28 @@ useEffect(() => {
           {wireframeMode ? "🔍 Wireframe ON" : "👤 Normal View"}
         </button>
       </Html>
+
+      {/* Stability Indicator */}
+      {/* <Html position={[1.5, -1.5, 1]} style={{ pointerEvents: "none" }}>
+        <div
+          style={{
+            background: "rgba(0,0,0,0.8)",
+            color: "white",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            textAlign: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+            Stability: {(1 - stability * 100).toFixed(1)}%
+          </div>
+          <div style={{ fontSize: "10px", opacity: 0.8 }}>
+            Tilt: {(getTiltAngle(stability) * 180 / Math.PI).toFixed(1)}°
+          </div>
+        </div>
+      </Html> */}
 
       {/* Hover tooltip */}
       {hoveredPart && (
@@ -376,9 +378,9 @@ useEffect(() => {
   );
 }
 
-// Analysis Panel Component (same as before)
-function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
-  if (!data && !cognitive) return null;
+// Updated AnalysisPanel to show stability
+function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, onClick }) {
+  if (!data && !cognitive && stability === undefined) return null;
 
   const getColorByNumber = (num, percentDiff) => {
     if (percentDiff) {
@@ -406,6 +408,11 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
     if (num > 6) return "High";
     if (num > 3) return "Medium";
     return "Low";
+  };
+
+  const getStabilityColor = (stability) => {
+    if (stability < 0.5) return "#4CAF50"; // Good/Stable (50-100%)
+    return "#F44336"; // Poor/Unstable (0-49%)
   };
 
   return (
@@ -439,6 +446,48 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
           Digital Twin Analysis
         </h3>
 
+        {/* Stability/Instability Section */}
+        {stability !== undefined && (
+          <div style={{ marginBottom: "12px" }}>
+            <h4
+              style={{
+                margin: "0 0 8px 0",
+                fontSize: "14px",
+                fontWeight: "600",
+              }}
+            >
+              {/* {stability <= 0.5 ? "Postural Stability" : "Postural Instability"} */}
+              Postural Stability
+            </h4>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>Level: {((1 - stability) * 100).toFixed(1)}%</span>
+              {/* {stability <= 0.5 ? (
+                <span>Level: {((0.5 - stability) / 0.5 * 100).toFixed(1)}%</span>
+               ) : ( 
+                  <span>Level: {((stability - 0.5) / 0.5 * 100).toFixed(1)}%</span> 
+                )}  */}
+              <span
+                style={{
+                  padding: "2px 8px",
+                  borderRadius: "4px",
+                  color: "white",
+                  fontSize: "12px",
+                  backgroundColor: getStabilityColor(stability),
+                }}
+              >
+                {stability >= 0.5 ? "Unstable" : "Stable"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Rest of the existing analysis panel code */}
         {cognitive && (
           <div style={{ marginBottom: "12px" }}>
             <h4
@@ -481,9 +530,10 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
             </div>
           </div>
         )}
-
+        {/* Exertion Analysis Panel */}
+        
         {data && (
-          <div>
+          <div style={{ marginBottom: "12px" }}>
             <h4
               style={{
                 margin: "0 0 8px 0",
@@ -491,11 +541,11 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
                 fontWeight: "600",
               }}
             >
-              Body Part Discomfort
+              Exertion
             </h4>
             <div style={{ display: "grid", gap: "4px" }}>
               {Object.entries(data)
-                .filter(([part, value]) => !["shoulder"].includes(part))
+                .filter(([part, value]) => ["exertion"].includes(part))
                 .map(([part, value]) => (
                   <div
                     key={part}
@@ -535,55 +585,63 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
           </div>
         )}
 
-        {/* <div style={{ marginTop: "12px", fontSize: "11px", color: "#666" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              marginBottom: "2px",
-            }}
-          >
-            <div
+        {data && (
+          <div>
+            <h4
               style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: "#4CAF50",
-                borderRadius: "2px",
+                margin: "0 0 8px 0",
+                fontSize: "14px",
+                fontWeight: "600",
               }}
-            ></div>
-            <span>Low Risk (0-3)</span>
+            >
+              Body Part Discomfort
+            </h4>
+            <div style={{ display: "grid", gap: "4px" }}>
+              {Object.entries(data)
+                .filter(
+                  ([part, value]) => !["shoulder", "exertion"].includes(part)
+                )
+                .map(([part, value]) => (
+                  <div
+                    key={part}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontSize: "12px",
+                    }}
+                  >
+                    <span style={{ textTransform: "capitalize" }}>
+                      {part.replace("_", " ")}:
+                    </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <span>{value?.toFixed(1)}</span>
+                      <span
+                        style={{
+                          padding: "1px 6px",
+                          borderRadius: "3px",
+                          color: "white",
+                          fontSize: "10px",
+                          backgroundColor: getColorByNumber(
+                            value,
+                            part === "exertion"
+                          ),
+                        }}
+                      >
+                        {getRiskLevel(value, part === "exertion")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              marginBottom: "2px",
-            }}
-          >
-            <div
-              style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: "#FF9800",
-                borderRadius: "2px",
-              }}
-            ></div>
-            <span>Medium Risk (3-6)</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <div
-              style={{
-                width: "12px",
-                height: "12px",
-                backgroundColor: "#F44336",
-                borderRadius: "2px",
-              }}
-            ></div>
-            <span>High Risk (6+)</span>
-          </div>
-        </div> */}
+        )}
       </div>
 
       <button
@@ -607,48 +665,49 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, seeLess, onClick }) {
 }
 
 const ModelViewer = (props) => {
-  const { data, cognitive, cognitiveLevel } = props;
+  const { data, cognitive, cognitiveLevel, stability } = props;
   const [state, setState] = useState(true);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-    <div style={{ flex: 1, position: 'relative' }}>
-      <Canvas
-        camera={{ position: [-55.5, 0, 10.25], fov: 45 }}
-        style={{ height: "1300px", width: "100%", marginTop: "0px" }}
-      >
-        <ambientLight intensity={1.25} />
-        <ambientLight intensity={0.1} />
-        <directionalLight intensity={0.4} />
-        <pointLight position={[10, 10, 10]} />
-        <OrbitControls />
-        <Suspense fallback={null}>
-          <Model position={[0.025, -0.19, 1]} props={props} />
-        </Suspense>
-      </Canvas>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <Canvas
+          camera={{ position: [-55.5, 0, 10.25], fov: 45 }}
+          style={{ height: "1300px", width: "100%", marginTop: "0px" }}
+        >
+          <ambientLight intensity={1.25} />
+          <ambientLight intensity={0.1} />
+          <directionalLight intensity={0.4} />
+          <pointLight position={[10, 10, 10]} />
+          <OrbitControls />
+          <Suspense fallback={null}>
+            <Model position={[0.025, -0.19, 1]} {...props} />
+          </Suspense>
+        </Canvas>
 
-      <AnalysisPanel
-        data={data}
-        cognitive={cognitive}
-        cognitiveLevel={cognitiveLevel}
-        onClick={() => setState((prev) => !prev)}
-        seeLess={state}
-      />
+        <AnalysisPanel
+          data={data}
+          cognitive={cognitive}
+          cognitiveLevel={cognitiveLevel}
+          stability={stability}
+          onClick={() => setState((prev) => !prev)}
+          seeLess={state}
+        />
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          right: "20px",
-          background: "rgba(255,255,255,0.9)",
-          padding: "12px",
-          borderRadius: "6px",
-          fontSize: "12px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
+        <div
+          style={{
+            position: "absolute",
+            bottom: "20px",
+            right: "20px",
+            background: "rgba(255,255,255,0.9)",
+            padding: "12px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          }}
+        >
+        </div>
       </div>
-    </div>
     </div>
   );
 };
