@@ -6,7 +6,7 @@ import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
 function Model(props) {
-  const { data, cognitive, cognitiveLevel, stability = 1 } = props; // Default stability to 1 (no tilt)
+  const { data, cognitive, cognitiveLevel, stability = 0 } = props; // Default stability to 1 (no tilt)
   const [hoveredPart, setHoveredPart] = useState(null);
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
@@ -15,13 +15,19 @@ function Model(props) {
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
 
-  // Calculate tilt angle based on stability (0 = no tilt/steady, 1 = max tilt/unsteady)
+  // Calculate tilt angle based on stability (0-0.5 = stable, 0.5-1 = unstable)
   const getTiltAngle = (stability) => {
     // Clamp stability between 0 and 1
     const clampedStability = Math.max(0, Math.min(1, stability));
-    // Convert to tilt angle: 0 stability = 0 degrees (steady), 1 stability = 30 degrees forward (unsteady)
-    const maxTiltAngle = Math.PI / 6; // 30 degrees in radians
-    return maxTiltAngle * clampedStability;
+    // No tilt for stable range (0-0.5), gradual tilt for unstable range (0.5-1)
+    if (clampedStability <= 0.5) {
+      return 0; // No tilt for stable range
+    } else {
+      // Map 0.5-1 range to 0-15 degrees
+      const instabilityLevel = (clampedStability - 0.5) / 0.5; // Convert to 0-1 range
+      const maxTiltAngle = Math.PI / 12; // 15 degrees in radians
+      return maxTiltAngle * instabilityLevel;
+    }
   };
 
   // Color mapping functions
@@ -405,9 +411,9 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
   };
 
   const getStabilityColor = (stability) => {
-    if (stability <= 0.2) return "#4CAF50"; // Low instability (steady)
-    if (stability <= 0.5) return "#FF9800"; // Moderate instability
-    return "#F44336"; // High instability (unsteady)
+    if (stability <= 0.5) return "#4CAF50"; // Stable range
+    if (stability <= 0.75) return "#FF9800"; // Moderate instability
+    return "#F44336"; // High instability
   };
 
   return (
@@ -470,7 +476,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                   backgroundColor: getStabilityColor(stability),
                 }}
               >
-                {stability <= 0.2 ? "Steady" : stability <= 0.5 ? "Moderate" : "Unsteady"}
+                {stability <= 0.5 ? "Stable" : stability <= 0.75 ? "Moderate" : "Unstable"}
               </span>
             </div>
           </div>
