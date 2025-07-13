@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import styles from '../FirstStep/FirstStep.module.css';
 import { Field, ErrorMessage } from 'formik';
-import RatingImage from '../../../../images/exertionRating.png'
+import RatingImage from '../../../../images/exertionRating.jpeg'
 import Image from 'next/image'
 
 export default function ThirdStepForm(props) {
@@ -28,6 +28,7 @@ export default function ThirdStepForm(props) {
               width={'auto'}
               height={'auto'}
               alt='rating scale'
+              style={{ maxHeight: '400px', objectFit: 'contain' }}
             />
           </Box>
           <fieldset
