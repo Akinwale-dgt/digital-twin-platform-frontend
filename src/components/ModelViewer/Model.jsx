@@ -6,7 +6,7 @@ import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
 function Model(props) {
-  const { data, cognitive, cognitiveLevel, stability = 0 } = props; // Default stability to 1 (no tilt)
+  const { data, cognitive, cognitiveLevel, stability = 0, isLoaded } = props; // Default stability to 1 (no tilt)
   const [hoveredPart, setHoveredPart] = useState(null);
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
@@ -298,7 +298,7 @@ function Model(props) {
       />
       
       {/* Wireframe Toggle Button */}
-      <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
+      {isLoaded && <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
         <button
           onClick={toggleWireframe}
           style={{
@@ -320,7 +320,7 @@ function Model(props) {
         >
           {wireframeMode ? "🔍 Wireframe ON" : "👤 Normal View"}
         </button>
-      </Html>
+      </Html>}
 
       {/* Stability Indicator */}
       {/* <Html position={[1.5, -1.5, 1]} style={{ pointerEvents: "none" }}>
@@ -665,7 +665,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
 }
 
 const ModelViewer = (props) => {
-  const { data, cognitive, cognitiveLevel, stability } = props;
+  const { data, cognitive, cognitiveLevel, stability, isLoaded } = props;
   const [state, setState] = useState(true);
 
   return (
@@ -685,14 +685,14 @@ const ModelViewer = (props) => {
           </Suspense>
         </Canvas>
 
-        <AnalysisPanel
+        {isLoaded &&<AnalysisPanel
           data={data}
           cognitive={cognitive}
           cognitiveLevel={cognitiveLevel}
           stability={stability}
           onClick={() => setState((prev) => !prev)}
           seeLess={state}
-        />
+        />}
 
         <div
           style={{

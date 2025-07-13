@@ -27,6 +27,7 @@ import ControlPanel from "../components/ControlPanel"; // Add this import
 export default function Home() {
   const router = useRouter();
   const [openAnalysis, setAnalysisOpen] = React.useState(false);
+  const [isLoaded, setIsLoaded] = React.useState(false);
   const [isNewSession, setNewSession] = React.useState("");
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -110,6 +111,7 @@ export default function Home() {
       .then((response) => {
         const data = response.data;
         setData(data);
+        setIsLoaded(true)
         window.scrollTo(100, 100)
 
         const reportId = data?.data?.report?.reportId;
@@ -378,13 +380,14 @@ export default function Home() {
                 />}
               </div>
 
-              {data?.data?.digital_twin && (
+              {/* {data?.data?.digital_twin && ( */}
                 <ModelArray
                   inferredAnalysis={reportData.inferredAnalysis}
-                  twins={data.data.digital_twin}
+                  twins={data?.data?.digital_twin}
                   controls={controls}
+                  isLoaded={isLoaded}
                 />
-              )}
+              {/* )} */}
             </div>
           </div>
         </main>
@@ -454,7 +457,7 @@ export default function Home() {
   );
 }
 
-function ModelArray({ twins, inferredAnalysis = [], controls }) {
+function ModelArray({ twins = [{}, {}, {}], inferredAnalysis = [], controls, isLoaded }) {
   return (
     <div
       style={{
@@ -467,9 +470,9 @@ function ModelArray({ twins, inferredAnalysis = [], controls }) {
     >
       {twins.slice(0, 3).map((twin, index) => {
         const discomfortData = twin.discomfort?.raw_scores;
-        const exertionData = twin.exertion?.raw_scores;
+        const exertionData = isLoaded? twin.exertion?.raw_scores : null;
         const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
-        const cognitiveLevel = (cognitiveWorkload / 120) * 100;
+        const cognitiveLevel = isLoaded ? (cognitiveWorkload / 120) * 100 : null;
         const { metrics } = inferredAnalysis[index] || {};
         const { fall_risk_pressure } = metrics || {};
 
@@ -492,6 +495,7 @@ function ModelArray({ twins, inferredAnalysis = [], controls }) {
                 ...(controls.discomfort ? discomfortData : {}), 
                 exertion: controls.exertion ? exertionData : null 
               }}
+              isLoaded={isLoaded}
               cognitive={controls.cognitiveLoad}
               cognitiveLevel={controls.cognitiveLoad ? cognitiveLevel : null}
               stability={controls.stability ? fall_risk_pressure : null}
