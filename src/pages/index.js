@@ -473,8 +473,9 @@ function ModelArray({ twins = [{}, {}, {}], inferredAnalysis = [], controls, isL
         const exertionData = isLoaded? twin.exertion?.raw_scores : null;
         const cognitiveWorkload = twin.cognitive_load?.overall_score || 0;
         const cognitiveLevel = isLoaded ? (cognitiveWorkload / 120) * 100 : null;
-        const { metrics } = inferredAnalysis[index] || {};
-        const { fall_risk_pressure } = metrics || {};
+        const stabilityData = isLoaded? twin.balance?.raw_scores : null;
+        // const { metrics } = inferredAnalysis[index] || {};
+        // const { fall_risk_pressure } = metrics || {};
 
         return (
           <div
@@ -498,7 +499,7 @@ function ModelArray({ twins = [{}, {}, {}], inferredAnalysis = [], controls, isL
               isLoaded={isLoaded}
               cognitive={controls.cognitiveLoad}
               cognitiveLevel={controls.cognitiveLoad ? cognitiveLevel : null}
-              stability={controls.stability ? fall_risk_pressure : null}
+              stability={controls.stability ? stabilityData : null}
             />
           </div>
         );
