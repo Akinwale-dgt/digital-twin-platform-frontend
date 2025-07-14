@@ -6,7 +6,7 @@ import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
 function Model(props) {
-  const { data, cognitive, cognitiveLevel, stability = 0, isLoaded } = props; // Default stability to 1 (no tilt)
+  const { data, cognitive, cognitiveLevel, stability = 0, isLoaded } = props;
   const [hoveredPart, setHoveredPart] = useState(null);
   const [modelNodes, setModelNodes] = useState({});
   const [allMeshes, setAllMeshes] = useState([]);
@@ -17,15 +17,12 @@ function Model(props) {
 
   // Calculate tilt angle based on stability (0-0.5 = stable, 0.5-1 = unstable)
   const getTiltAngle = (stability) => {
-    // Clamp stability between 0 and 1
     const clampedStability = Math.max(0, Math.min(1, stability));
-    // No tilt for stable range (0-0.5), gradual tilt for unstable range (0.5-1)
     if (clampedStability <= 0.5) {
-      return 0; // No tilt for stable range
+      return 0;
     } else {
-      // Map 0.5-1 range to 0-15 degrees
-      const instabilityLevel = (clampedStability - 0.5) / 0.5; // Convert to 0-1 range
-      const maxTiltAngle = Math.PI / 24; // 5 degrees in radians
+      const instabilityLevel = (clampedStability - 0.5) / 0.5;
+      const maxTiltAngle = Math.PI / 24; // 7.5 degrees in radians
       return maxTiltAngle * instabilityLevel;
     }
   };
@@ -67,10 +64,11 @@ function Model(props) {
 
   const gltf = useLoader(GLTFLoader, "/images/DT.glb");
 
-  const clonedScene = useMemo(() => {
-    const clone = gltf.scene.clone(true);
-
-    clone.traverse((node) => {
+  // Enhanced scene processing with stability-based squatting transform
+  const processedScene = useMemo(() => {
+    // Deep clone scene & materials
+    const sceneClone = gltf.scene.clone(true);
+    sceneClone.traverse((node) => {
       if (node.isMesh) {
         node.geometry = node.geometry.clone();
         node.material = node.material.clone();
@@ -78,16 +76,70 @@ function Model(props) {
       }
     });
 
-    return clone;
-  }, [gltf]);
+    // Only apply squatting transform if stability indicates instability (> 0.5)
+    if (stability > 0.5) {
+      // Compute average Z to find knee pivot point
+      let sumZ = 0, count = 0;
+      sceneClone.traverse((node) => {
+        if (node.isMesh) {
+          const positions = node.geometry.attributes.position.array;
+          for (let i = 2; i < positions.length; i += 3) {
+            sumZ += positions[i]; 
+            count++;
+          }
+        }
+      });
+      
+      const kneeHeight = (sumZ / count) * 0.5; // Knee pivot height
+      
+      // Calculate bend angle based on stability level (0.5-1 maps to 0-25 degrees)
+      const instabilityLevel = (stability - 0.5) / 0.5; // Convert 0.5-1 to 0-1
+      const maxBendAngle = 25; // Maximum bend angle in degrees
+      const bendAngle = (maxBendAngle * instabilityLevel * Math.PI) / 180;
+      const cosAngle = Math.cos(bendAngle);
+      const sinAngle = Math.sin(bendAngle);
 
+      // Apply squatting transform to vertices below knee height
+      sceneClone.traverse((node) => {
+        if (node.isMesh) {
+          const positionAttribute = node.geometry.attributes.position;
+          const positions = positionAttribute.array;
+          
+          for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i + 1];
+            const z = positions[i + 2];
+            
+            // Only transform vertices below knee height
+            if (z <= kneeHeight) {
+              const relativeZ = z - kneeHeight;
+              
+              // Apply rotation around knee pivot
+              const newY = y * cosAngle - relativeZ * sinAngle;
+              const newZ = y * sinAngle + relativeZ * cosAngle + kneeHeight;
+              
+              positions[i + 1] = newY;
+              positions[i + 2] = newZ;
+            }
+          }
+          
+          positionAttribute.needsUpdate = true;
+          node.geometry.computeVertexNormals(); // Recalculate normals for lighting
+        }
+      });
+    }
+
+    return sceneClone;
+  }, [gltf, stability]);
+
+  // Collect meshes and store original materials
   useEffect(() => {
-    if (!clonedScene) return;
+    if (!processedScene) return;
 
     const nodes = {};
     const meshes = [];
 
-    clonedScene.traverse((child) => {
+    processedScene.traverse((child) => {
       if (child.name && child.name.trim() !== "") {
         nodes[child.name.toLowerCase()] = child;
       }
@@ -100,20 +152,17 @@ function Model(props) {
 
     setModelNodes(nodes);
     setAllMeshes(meshes);
-  }, [clonedScene]);
+  }, [processedScene]);
 
-  // Apply tilt based on stability
+  // Apply postural tilt based on stability
   useEffect(() => {
     if (modelRef.current && stability !== undefined) {
       const tiltAngle = getTiltAngle(stability);
       modelRef.current.rotation.x = tiltAngle;
-      
-      // Optional: Add a slight Y-axis adjustment for more realistic posture
-      // modelRef.current.rotation.y = tiltAngle * 0.1; // Slight side lean
     }
   }, [stability]);
 
-  // Apply color changes to actual model materials
+  // Apply color changes to model materials
   useEffect(() => {
     if (allMeshes.length > 0 && (data || cognitive || cognitiveLevel)) {
       allMeshes.forEach((mesh) => {
@@ -122,24 +171,21 @@ function Model(props) {
         let bodyPart = null;
         let dataValue = null;
 
-        // COGNITIVE LOAD -> BRAIN ONLY (not whole head)
-        if (
-          meshName.includes("brain") &&
-          cognitiveLevel !== undefined
-        ) {
+        // COGNITIVE LOAD -> BRAIN ONLY
+        if (meshName.includes("brain") && cognitiveLevel !== undefined) {
           targetColor = getThreeColor(getCognitiveColor(cognitiveLevel));
           bodyPart = "brain (cognitive load)";
           dataValue = cognitiveLevel;
         }
         // EXERTION -> HEART ONLY
-         else if (meshName.includes("heart") && data?.exertion !== undefined) {
+        else if (meshName.includes("heart") && data?.exertion !== undefined) {
           targetColor = getThreeColor(getColorByNumber(data.exertion, "20%"));
           bodyPart = "heart (exertion)";
           dataValue = data.exertion;
         }
         // DISCOMFORT DATA -> BODY PARTS
         else if (data) {
-          // Check for hand/wrist meshes
+          // Hand/wrist meshes
           if (
             (meshName.includes("hand") ||
               meshName.includes("wrist") ||
@@ -150,7 +196,7 @@ function Model(props) {
             bodyPart = "hand_wrist";
             dataValue = data.hand_wrist;
           }
-          // Check for upper arm meshes
+          // Upper arm meshes
           else if (
             meshName.includes("upper") &&
             (meshName.includes("hand") ||
@@ -161,7 +207,7 @@ function Model(props) {
             bodyPart = "upper_arm";
             dataValue = data.upper_arm;
           }
-          // Check for general arm meshes
+          // General arm meshes
           else if (
             meshName.includes("arm") &&
             !meshName.includes("upper") &&
@@ -172,7 +218,7 @@ function Model(props) {
             bodyPart = "upper_arm";
             dataValue = data.upper_arm;
           }
-          // Check for shoulder meshes
+          // Shoulder meshes
           else if (
             meshName.includes("shoulder") ||
             meshName.includes("clavicle")
@@ -181,7 +227,7 @@ function Model(props) {
             bodyPart = "shoulder";
             dataValue = data.shoulder;
           }
-          // Check for chest/torso meshes
+          // Chest/torso meshes
           else if (
             (meshName.includes("chest") ||
               meshName.includes("torso") ||
@@ -193,7 +239,7 @@ function Model(props) {
             bodyPart = "chest";
             dataValue = data.chest;
           }
-          // Check for back/spine meshes
+          // Back/spine meshes
           else if (
             meshName.includes("back") ||
             meshName.includes("spine") ||
@@ -203,7 +249,7 @@ function Model(props) {
             bodyPart = "lower_back";
             dataValue = data.lower_back;
           }
-          // Check for thigh/upper leg meshes
+          // Thigh/upper leg meshes
           else if (
             (meshName.includes("leg") ||
               meshName.includes("thigh") ||
@@ -214,7 +260,7 @@ function Model(props) {
             bodyPart = "thigh";
             dataValue = data.thigh;
           }
-          // Check for lower leg meshes
+          // Lower leg meshes
           else if (
             meshName.includes("lower") &&
             (meshName.includes("leg") ||
@@ -225,13 +271,13 @@ function Model(props) {
             bodyPart = "lower_leg_foot";
             dataValue = data.lower_leg_foot;
           }
-          // Check for foot meshes
+          // Foot meshes
           else if (meshName.includes("foot") || meshName.includes("ankle")) {
             targetColor = getThreeColor(getColorByNumber(data.lower_leg_foot));
             bodyPart = "lower_leg_foot";
             dataValue = data.lower_leg_foot;
           }
-          // Check for head meshes
+          // Head meshes
           else if (
             meshName.includes("head") &&
             (!meshName.includes("neck") || !meshName.includes("brain"))
@@ -240,7 +286,7 @@ function Model(props) {
             bodyPart = "head";
             dataValue = data.head;
           }
-          // Check for neck meshes
+          // Neck meshes
           else if (
             meshName.includes("neck") &&
             !meshName.includes("head") &&
@@ -269,7 +315,7 @@ function Model(props) {
             );
           }
         } else {
-          // Apply wireframe to unmapped meshes too for consistency
+          // Apply wireframe to unmapped meshes for consistency
           const originalMaterial = originalMaterials.current.get(mesh.uuid);
           if (originalMaterial && wireframeMode) {
             mesh.material = originalMaterial.clone();
@@ -291,58 +337,38 @@ function Model(props) {
   return (
     <>
       <primitive 
-        object={clonedScene} 
+        object={processedScene} 
         ref={modelRef} 
         scale={[9, 7, 9]}  
         position={[0.025, -0.9, 1]}
       />
       
       {/* Wireframe Toggle Button */}
-      {isLoaded && <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
-        <button
-          onClick={toggleWireframe}
-          style={{
-            background: wireframeMode
-              ? "rgba(76, 175, 80, 0.9)"
-              : "rgba(244, 67, 54, 0.9)",
-            color: "white",
-            border: "none",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            fontSize: "12px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-            transition: "all 0.2s",
-          }}
-          onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
-          onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-        >
-          {wireframeMode ? "🔍 Wireframe ON" : "👤 Normal View"}
-        </button>
-      </Html>}
-
-      {/* Stability Indicator */}
-      {/* <Html position={[1.5, -1.5, 1]} style={{ pointerEvents: "none" }}>
-        <div
-          style={{
-            background: "rgba(0,0,0,0.8)",
-            color: "white",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            fontSize: "12px",
-            textAlign: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-          }}
-        >
-          <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
-            Stability: {(1 - stability * 100).toFixed(1)}%
-          </div>
-          <div style={{ fontSize: "10px", opacity: 0.8 }}>
-            Tilt: {(getTiltAngle(stability) * 180 / Math.PI).toFixed(1)}°
-          </div>
-        </div>
-      </Html> */}
+      {isLoaded && (
+        <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
+          <button
+            onClick={toggleWireframe}
+            style={{
+              background: wireframeMode
+                ? "rgba(76, 175, 80, 0.9)"
+                : "rgba(244, 67, 54, 0.9)",
+              color: "white",
+              border: "none",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              transition: "all 0.2s",
+            }}
+            onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
+            onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+          >
+            {wireframeMode ? "🔍 Wireframe ON" : "👤 Normal View"}
+          </button>
+        </Html>
+      )}
 
       {/* Hover tooltip */}
       {hoveredPart && (
@@ -411,8 +437,8 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
   };
 
   const getStabilityColor = (stability) => {
-    if (stability < 0.5) return "#4CAF50"; // Good/Stable (50-100%)
-    return "#F44336"; // Poor/Unstable (0-49%)
+    if (stability < 0.5) return "#4CAF50"; // Good/Stable
+    return "#F44336"; // Poor/Unstable
   };
 
   return (
@@ -446,7 +472,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
           Digital Twin Analysis
         </h3>
 
-        {/* Stability/Instability Section */}
+        {/* Stability Section */}
         {stability !== undefined && (
           <div style={{ marginBottom: "12px" }}>
             <h4
@@ -456,7 +482,6 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 fontWeight: "600",
               }}
             >
-              {/* {stability <= 0.5 ? "Postural Stability" : "Postural Instability"} */}
               Postural Stability
             </h4>
             <div
@@ -467,11 +492,6 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
               }}
             >
               <span>Level: {((1 - stability) * 100).toFixed(1)}%</span>
-              {/* {stability <= 0.5 ? (
-                <span>Level: {((0.5 - stability) / 0.5 * 100).toFixed(1)}%</span>
-               ) : ( 
-                  <span>Level: {((stability - 0.5) / 0.5 * 100).toFixed(1)}%</span> 
-                )}  */}
               <span
                 style={{
                   padding: "2px 8px",
@@ -487,7 +507,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
           </div>
         )}
 
-        {/* Rest of the existing analysis panel code */}
+        {/* Cognitive Load Section */}
         {cognitive && (
           <div style={{ marginBottom: "12px" }}>
             <h4
@@ -530,8 +550,8 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
             </div>
           </div>
         )}
-        {/* Exertion Analysis Panel */}
-        
+
+        {/* Exertion Section */}
         {data && (
           <div style={{ marginBottom: "12px" }}>
             <h4
@@ -585,6 +605,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
           </div>
         )}
 
+        {/* Body Part Discomfort Section */}
         {data && (
           <div>
             <h4
@@ -657,6 +678,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
           fontSize: "14px",
         }}
         onMouseOver={(e) => (e.target.style.backgroundColor = "#1976D2")}
+        onMouseOut={(e) => (e.target.style.backgroundColor = "#0070f3")}
       >
         See {seeLess ? "More" : "Less"}
       </button>
@@ -685,14 +707,16 @@ const ModelViewer = (props) => {
           </Suspense>
         </Canvas>
 
-        {isLoaded &&<AnalysisPanel
-          data={data}
-          cognitive={cognitive}
-          cognitiveLevel={cognitiveLevel}
-          stability={stability}
-          onClick={() => setState((prev) => !prev)}
-          seeLess={state}
-        />}
+        {isLoaded && (
+          <AnalysisPanel
+            data={data}
+            cognitive={cognitive}
+            cognitiveLevel={cognitiveLevel}
+            stability={stability}
+            onClick={() => setState((prev) => !prev)}
+            seeLess={state}
+          />
+        )}
 
         <div
           style={{
