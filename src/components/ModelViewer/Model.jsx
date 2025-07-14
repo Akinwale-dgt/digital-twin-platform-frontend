@@ -15,13 +15,13 @@ function Model(props) {
   const modelRef = useRef();
   const originalMaterials = useRef(new Map());
 
-  // Calculate tilt angle based on stability (0-0.5 = stable, 0.5-1 = unstable)
+  // Calculate tilt angle based on stability (1-5 = stable, 5-10 = unstable)
   const getTiltAngle = (stability) => {
-    const clampedStability = Math.max(0, Math.min(1, stability));
-    if (clampedStability <= 0.5) {
+    const clampedStability = Math.max(1, Math.min(10, stability));
+    if (clampedStability <= 5) {
       return 0;
     } else {
-      const instabilityLevel = (clampedStability - 0.5) / 0.5;
+      const instabilityLevel = (clampedStability - 5) / 5;
       const maxTiltAngle = Math.PI / 24; // 7.5 degrees in radians
       return maxTiltAngle * instabilityLevel;
     }
@@ -76,8 +76,8 @@ function Model(props) {
       }
     });
 
-    // Only apply squatting transform if stability indicates instability (> 0.5)
-    if (stability > 0.5) {
+    // Only apply squatting transform if stability indicates instability (> 5)
+    if (stability > 5) {
       // Compute average Z to find knee pivot point
       let sumZ = 0, count = 0;
       sceneClone.traverse((node) => {
@@ -92,8 +92,8 @@ function Model(props) {
       
       const kneeHeight = (sumZ / count) * 0.5; // Knee pivot height
       
-      // Calculate bend angle based on stability level (0.5-1 maps to 0-25 degrees)
-      const instabilityLevel = (stability - 0.5) / 0.5; // Convert 0.5-1 to 0-1
+      // Calculate bend angle based on stability level (5-10 maps to 0-25 degrees)
+      const instabilityLevel = (stability - 5) / 5; // Convert 5-10 to 0-1
       const maxBendAngle = 25; // Maximum bend angle in degrees
       const bendAngle = (maxBendAngle * instabilityLevel * Math.PI) / 180;
       const cosAngle = Math.cos(bendAngle);
@@ -437,8 +437,8 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
   };
 
   const getStabilityColor = (stability) => {
-    if (stability < 0.5) return "#4CAF50"; // Good/Stable
-    return "#F44336"; // Poor/Unstable
+    if (stability <= 5) return "#4CAF50"; // Good/Stable (1-5)
+    return "#F44336"; // Poor/Unstable (5-10)
   };
 
   return (
@@ -491,7 +491,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 alignItems: "center",
               }}
             >
-              <span>Level: {((1 - stability) * 100).toFixed(1)}%</span>
+              <span>Level: {((10 - stability) / 10 * 100).toFixed(1)}%</span>
               <span
                 style={{
                   padding: "2px 8px",
@@ -501,7 +501,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                   backgroundColor: getStabilityColor(stability),
                 }}
               >
-                {stability >= 0.5 ? "Unstable" : "Stable"}
+                {stability > 5 ? "Unstable" : "Stable"}
               </span>
             </div>
           </div>
