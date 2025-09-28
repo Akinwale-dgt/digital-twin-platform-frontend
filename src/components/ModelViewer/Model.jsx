@@ -45,11 +45,11 @@ function Model(props) {
   const getThreeColor = (colorString) => {
     switch (colorString) {
       case "red":
-        return new THREE.Color(0xff0000);
+        return new THREE.Color(0xd90000);
       case "orange":
-        return new THREE.Color(0xff9800);
+        return new THREE.Color(0xff7a00);
       case "green":
-        return new THREE.Color(0x4caf50);
+        return new THREE.Color(0x00a000);
       default:
         return new THREE.Color(0xd3d3d3);
     }
@@ -79,19 +79,20 @@ function Model(props) {
     // Only apply squatting transform if stability indicates instability (> 5)
     if (stability > 5) {
       // Compute average Z to find knee pivot point
-      let sumZ = 0, count = 0;
+      let sumZ = 0,
+        count = 0;
       sceneClone.traverse((node) => {
         if (node.isMesh) {
           const positions = node.geometry.attributes.position.array;
           for (let i = 2; i < positions.length; i += 3) {
-            sumZ += positions[i]; 
+            sumZ += positions[i];
             count++;
           }
         }
       });
-      
+
       const kneeHeight = (sumZ / count) * 0.5; // Knee pivot height
-      
+
       // Calculate bend angle based on stability level (5-10 maps to 0-25 degrees)
       const instabilityLevel = (stability - 5) / 5; // Convert 5-10 to 0-1
       const maxBendAngle = 25; // Maximum bend angle in degrees
@@ -104,25 +105,25 @@ function Model(props) {
         if (node.isMesh) {
           const positionAttribute = node.geometry.attributes.position;
           const positions = positionAttribute.array;
-          
+
           for (let i = 0; i < positions.length; i += 3) {
             const x = positions[i];
             const y = positions[i + 1];
             const z = positions[i + 2];
-            
+
             // Only transform vertices below knee height
             if (z <= kneeHeight) {
               const relativeZ = z - kneeHeight;
-              
+
               // Apply rotation around knee pivot
               const newY = y * cosAngle - relativeZ * sinAngle;
               const newZ = y * sinAngle + relativeZ * cosAngle + kneeHeight;
-              
+
               positions[i + 1] = newY;
               positions[i + 2] = newZ;
             }
           }
-          
+
           positionAttribute.needsUpdate = true;
           node.geometry.computeVertexNormals(); // Recalculate normals for lighting
         }
@@ -306,8 +307,53 @@ function Model(props) {
             mesh.material.color = targetColor;
             mesh.material.emissive = targetColor.clone().multiplyScalar(0.1);
             mesh.material.wireframe = wireframeMode;
+            // mesh.material.transparent = true;
+            // mesh.material.opacity = wireframeMode ? 1.0 : 0.8;
             mesh.material.transparent = true;
-            mesh.material.opacity = wireframeMode ? 1.0 : 0.8;
+
+            // Highlight key body parts, fade others
+            mesh.material.opacity = [
+              "brain",
+              "heart",
+              "hand",
+              "wrist",
+              "finger",
+              "upper hand",
+              "upper arm",
+              "bicep",
+              "arm",
+              "shoulder",
+              "clavicle",
+              // "chest",
+              "torso",
+              "body",
+              "back",
+              "spine",
+              "pelvis",
+              "leg",
+              "thigh",
+              "femur",
+              "lower leg",
+              "calf",
+              "shin",
+              "foot",
+              "ankle",
+              "head",
+              "neck",
+              "brain (cognitive load)",
+              "heart (exertion)",
+              "hand_wrist",
+              "upper_arm",
+              "shoulder",
+              "lower_back",
+              "thigh",
+              "lower_leg_foot",
+            ].includes(bodyPart)
+              ? 0.8
+              : 0.1; // very transparent, adjust 0.0 - 1.0
+            mesh.material.depthWrite = false; // prevents z-buffer hiding inner meshes
+            // ends here
+
             mesh.material.needsUpdate = true;
 
             console.log(
@@ -336,13 +382,13 @@ function Model(props) {
 
   return (
     <>
-      <primitive 
-        object={processedScene} 
-        ref={modelRef} 
-        scale={[9, 7, 9]}  
+      <primitive
+        object={processedScene}
+        ref={modelRef}
+        scale={[9, 7, 9]}
         position={[0.025, -0.9, 1]}
       />
-      
+
       {/* Wireframe Toggle Button */}
       {isLoaded && (
         <Html position={[-1.5, 1.5, 1]} style={{ pointerEvents: "all" }}>
@@ -405,7 +451,14 @@ function Model(props) {
 }
 
 // Updated AnalysisPanel to show stability
-function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, onClick }) {
+function AnalysisPanel({
+  data,
+  cognitive,
+  cognitiveLevel,
+  stability,
+  seeLess,
+  onClick,
+}) {
   if (!data && !cognitive && stability === undefined) return null;
 
   const getColorByNumber = (num, percentDiff) => {
@@ -491,7 +544,7 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                 alignItems: "center",
               }}
             >
-              <span>Level: {((10 - stability) / 10 * 100).toFixed(1)}%</span>
+              <span>Level: {(((10 - stability) / 10) * 100).toFixed(1)}%</span>
               <span
                 style={{
                   padding: "2px 8px",
@@ -593,7 +646,10 @@ function AnalysisPanel({ data, cognitive, cognitiveLevel, stability, seeLess, on
                           borderRadius: "3px",
                           color: "white",
                           fontSize: "10px",
-                          backgroundColor: getColorByNumber(value, part === "exertion"),
+                          backgroundColor: getColorByNumber(
+                            value,
+                            part === "exertion"
+                          ),
                         }}
                       >
                         {getRiskLevel(value, part === "exertion")}
@@ -691,8 +747,8 @@ const ModelViewer = (props) => {
   const [state, setState] = useState(true);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flex: 1, position: 'relative' }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ flex: 1, position: "relative" }}>
         <Canvas
           camera={{ position: [-55.5, 0, 10.25], fov: 45 }}
           style={{ height: "1300px", width: "100%", marginTop: "0px" }}
@@ -729,8 +785,7 @@ const ModelViewer = (props) => {
             fontSize: "12px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
-        >
-        </div>
+        ></div>
       </div>
     </div>
   );
