@@ -83,7 +83,16 @@ export default function Home() {
   // ✅ Convert markdown to HTML once reportData is loaded
   React.useEffect(() => {
     if (reportData?.results?.report_markdown) {
-      setHtml(marked.parse(reportData.results.report_markdown));
+      const styles = `<style>
+          p {
+            font-size: 20px;
+          }
+
+          li {
+            font-size: 20px;
+          }
+      </style>`
+      setHtml(styles + marked.parse(reportData.results.report_markdown));
     }
   }, [reportData]);
 
